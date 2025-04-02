@@ -1,13 +1,16 @@
 # UAT
 
 ## Get started
+1. Go to the project folder
+   ```bash
+    cd Ubiqutous
+   ```
 1. Install dependencies
    ```bash
    npm install
    ```
 2. Start the app
    ```bash
-    cd Ubiqutous
     npx expo start
    ```
 
