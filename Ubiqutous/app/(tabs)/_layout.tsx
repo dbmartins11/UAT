@@ -17,6 +17,33 @@ export default function TabLayout() {
       }}
     >
 
+<Tabs.Screen
+        name="index"
+        options={{
+          tabBarStyle: {
+            display: 'none',
+          },
+        }}
+      />
+
+<Tabs.Screen
+        name="login"
+        options={{
+          tabBarStyle: {
+            display: 'none',
+          },
+        }}
+      />
+
+<Tabs.Screen
+        name="register"
+        options={{
+          tabBarStyle: {
+            display: 'none',
+          },
+        }}
+      />
+
       <Tabs.Screen
         name="home"
         options={{

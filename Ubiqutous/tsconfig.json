@@ -1,11 +1,12 @@
+
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "baseUrl": ".",  // ensures that the base is the root of the project
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@components/*": ["app/components/*"],
+      "@firebase/*": ["firebase/*"]
     }
   },
   "include": [
