@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
-import { fetchCities } from '../../api/api';
+import { fetchCities, fetchImages, fetchMonuments } from '../../api/api';
 
 export default function Home() {
     useEffect(() => {
         console.log('Home component mounted'); 
         const fetchData = async () => {
             try {
-                fetchCities("Portugal")
+                fetchMonuments("Lisbon")
             }
             catch (error) {
                 console.error('Error in Home component:', error);
@@ -60,3 +60,4 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
     }
 });
+ 

@@ -25,7 +25,7 @@ export const fetchCities = async (country) => {
             }
         });
         console.log("adasdasdasdasd: " + cities);
-        return data
+        return cities
     }
     catch (error) {
         console.error('Error fetching cities:', error);
@@ -33,3 +33,39 @@ export const fetchCities = async (country) => {
     }
 }
 
+export const fetchImages = async (query) => {
+    const images = [];
+    try {
+        const response = await fetch(`https://serpapi.com/search.json?engine=google_images&q=${query}&api_key=${serpapiKey}`);
+        const data = await response.json();
+
+        const links = data.images_results
+        .filter(q =>q.thumbnail !== undefined)
+        .map(q => q.thumbnail);
+
+        console.log("adasdasdasdasd: " + links);
+
+        return data;
+    }
+    catch (error) {
+        console.error('Error fetching cities:', error);
+        return null;
+    }
+}
+
+export const fetchMonuments = async (city) => {
+    //const monuments = [];
+    try {
+        const response = await fetch(`https://serpapi.com/search.json?engine=google&q=Principais+monumentos+em+${city}&api_key=${serpapiKey}`);
+        const data = await response.json();
+        const monuments = data.top_sights.sights
+        .filter(q => q.title !== undefined)
+        .map(q => q.title);
+        console.log("adasdasdasdasd: " + monuments );
+        return monuments;
+    }
+    catch (error) {
+        console.error('Error fetching cities:', error);
+        return null;
+    }
+}
