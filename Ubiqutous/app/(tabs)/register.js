@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -18,27 +18,8 @@ import { auth, db, storage } from '../../firebase/firebaseConf';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
 
 export default function RegisterScreen() {
-
-    useFocusEffect(
-        useCallback(() => {
-          // when the screen is focused, we can set the state to initial values
-      
-          return () => {
-            // Reset state when the screen is unfocused
-            setUsername('');
-            setEmail('');
-            setPassword('');
-            setRepeatPassword('');
-            setImage(null);
-            setShowPassword(false);
-            setShowRepeatPassword(false);
-          };
-        }, [])
-      );
-
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -50,14 +31,33 @@ export default function RegisterScreen() {
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setUsername('');
+        setEmail('');
+        setPassword('');
+        setRepeatPassword('');
+        setImage(null);
+        setShowPassword(false);
+        setShowRepeatPassword(false);
+      };
+    }, [])
+  );
+
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (permissionResult.granted === false) {
+    if (!permissionResult.granted) {
       alert('Permission to access camera roll is required!');
       return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, quality: 0.7 });
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 0.7,
+    });
+
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
@@ -65,46 +65,56 @@ export default function RegisterScreen() {
 
   const handleRegister = async () => {
     if (!username || !email || !password || !repeatPassword) {
-      alert('Please fill in all fields.');
+      Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
 
     if (password !== repeatPassword) {
-      alert('Passwords do not match.');
+      Alert.alert('Error', 'Passwords do not match.');
       return;
     }
 
     const emailRegex = /\S+@\S+\.\S+/;
     if (!emailRegex.test(email)) {
-      alert('Invalid email address.');
+      Alert.alert('Error', 'Invalid email address.');
       return;
     }
 
     setLoading(true);
 
     try {
-      // Check if username already exists
       const q = query(collection(db, 'users'), where('username', '==', username));
       const querySnapshot = await getDocs(q);
+
       if (!querySnapshot.empty) {
         setLoading(false);
-        alert('Username already taken.');
+        Alert.alert('Error', 'Username already taken.');
         return;
       }
 
-      // Create user with Firebase Auth
+      let photoURL = '';
+
+      // Handle image upload first (if image is selected)
+      if (image) {
+        try {
+          const response = await fetch(image);
+          const blob = await response.blob();
+          const tempUid = `${Date.now()}-${username}`; // temporary ref in case Auth fails
+          const storageRef = ref(storage, `profilePhotos/${tempUid}.jpg`);
+          await uploadBytes(storageRef, blob);
+          photoURL = await getDownloadURL(storageRef);
+        } catch (uploadErr) {
+          setLoading(false);
+          Alert.alert('Error', 'Failed to upload image.');
+          return;
+        }
+      }
+
+      // Now create the user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      let photoURL = '';
-      if (image) {
-        const response = await fetch(image);
-        const blob = await response.blob();
-        const storageRef = ref(storage, `profilePhotos/${uid}.jpg`);
-        await uploadBytes(storageRef, blob);
-        photoURL = await getDownloadURL(storageRef);
-      }
-
+      // Save to Firestore
       await setDoc(doc(db, 'users', uid), {
         username,
         email,
@@ -116,11 +126,11 @@ export default function RegisterScreen() {
     } catch (error) {
       setLoading(false);
       if (error.code === 'auth/email-already-in-use') {
-        alert('Email already in use.');
+        Alert.alert('Error', 'Email already in use.');
       } else if (error.code === 'auth/weak-password') {
-        alert('Password should be at least 6 characters.');
+        Alert.alert('Error', 'Password should be at least 6 characters.');
       } else {
-        alert('Registration error: ' + error.message);
+        Alert.alert('Registration Error', error.message);
       }
     }
   };
@@ -194,7 +204,9 @@ export default function RegisterScreen() {
 
         <View style={styles.profileUploadRow}>
           <View style={styles.profileCircle}>
-            {image && <Image source={{ uri: image }} style={{ width: 60, height: 60, borderRadius: 30 }} />}
+            {image && (
+              <Image source={{ uri: image }} style={{ width: 60, height: 60, borderRadius: 30 }} />
+            )}
           </View>
           <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
             <Text style={{ color: 'white', fontWeight: 'bold' }}>Upload Profile Photo</Text>
