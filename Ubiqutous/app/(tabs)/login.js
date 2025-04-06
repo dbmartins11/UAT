@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,11 +12,22 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebaseConf';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  // 🧼 Limpa os campos ao sair da página
+  useFocusEffect(
+    useCallback(() => {
+      return () => {
+        setEmail('');
+        setPassword('');
+      };
+    }, [])
+  );
 
   const handleLogin = async () => {
     try {
@@ -109,7 +120,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(205, 224, 245, 0.6)',
   },
   logo: {
-    width: 240, 
+    width: 240,
     height: 240,
     marginBottom: 40,
   },
