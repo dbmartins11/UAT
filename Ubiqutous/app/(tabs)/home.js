@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
-import { fetchCities, fetchImages, fetchMonuments } from '../../api/api';
+import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
+import AppLoading from 'expo-app-loading';
 
 export default function Home() {
-    useEffect(() => {
-        console.log('Home component mounted'); 
-        const fetchData = async () => {
-            try {
-                fetchMonuments("Lisbon")
-            }
-            catch (error) {
-                console.error('Error in Home component:', error);
-            };
-        }
-        fetchData(); 
-    }, []);
+    const [fontsLoaded] = useFonts({
+        Merriweather_700Bold,
+    });
+
+    if (!fontsLoaded) {
+        return <AppLoading />;
+    }
 
     return (
         <View style={styles.homeImage}>
@@ -27,6 +23,7 @@ export default function Home() {
                     source={require('../../assets/images/icon.png')}
                     style={styles.icon} />
             </ImageBackground>
+            
         </View>
     );
 }
@@ -35,8 +32,6 @@ const styles = StyleSheet.create({
     homeImage: {
         height: '47%',
         width: '100%',
-        textAlign: 'left',
-        fontFamily: 'PatuaOne',
     },
     icon: {
         width: '20%',
@@ -55,9 +50,10 @@ const styles = StyleSheet.create({
     slogan: {
         textAlign: 'left',
         fontSize: 35,
-        bottom: '15%',
+        bottom: '13%',
         width: '100%',
         paddingLeft: 20,
-    }
+        fontFamily: 'Merriweather_700Bold', 
+        color: '#fff',
+    },
 });
- 
