@@ -1,12 +1,19 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ImageBackground, Image } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import AppLoading from 'expo-app-loading';
+import { useRouter } from 'expo-router';
+import SearchBar from '../../components/SearchBar';
 
 export default function Home() {
+    const [searchText, setSearchText] = useState('');
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
     });
+
+    const handleSearch = (text) => {
+        setSearchText(text);
+    }
 
     if (!fontsLoaded) {
         return <AppLoading />;
@@ -23,7 +30,8 @@ export default function Home() {
                     source={require('../../assets/images/icon.png')}
                     style={styles.icon} />
             </ImageBackground>
-            
+            <SearchBar 
+                onSearch={handleSearch}/>
         </View>
     );
 }
@@ -53,7 +61,7 @@ const styles = StyleSheet.create({
         bottom: '13%',
         width: '100%',
         paddingLeft: 20,
-        fontFamily: 'Merriweather_700Bold', 
+        fontFamily: 'Merriweather_700Bold',
         color: '#fff',
     },
 });

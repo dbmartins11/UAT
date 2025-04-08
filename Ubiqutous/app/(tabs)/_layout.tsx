@@ -21,7 +21,7 @@ export default function TabLayout() {
         name="index"
         options={{
           tabBarStyle: {
-            display: 'none',
+           // display: 'none',
           },
         }}
       />
