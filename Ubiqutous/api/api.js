@@ -3,12 +3,6 @@
 
 const serpapiKey = "9a0b8b66a8c2ff39a093921cc324852293c5e052eed48a7e65be066e3db34a3d";
 
-
-const popularTouristCountries = [
-    "Portugal", "France", "Spain", "USA", "China", "Italy", "Turkey",
-    "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
-];
-
 export const fetchCities = async (country) => {
     const cities = [];
     try {
@@ -24,7 +18,7 @@ export const fetchCities = async (country) => {
                 cities.push(city);
             }
         });
-        console.log("adasdasdasdasd: " + cities);
+        //console.log("adasdasdasdasd: " + cities);
         return cities
     }
     catch (error) {
@@ -36,16 +30,17 @@ export const fetchCities = async (country) => {
 export const fetchImages = async (query) => {
     const images = [];
     try {
-        const response = await fetch(`https://serpapi.com/search.json?engine=google_images&q=${query}&api_key=${serpapiKey}`);
+        const response = await fetch(`https://serpapi.com/search.json?engine=google_images&q=${query}+Monumentos&api_key=${serpapiKey}`);
         const data = await response.json();
 
         const links = data.images_results
         .filter(q =>q.thumbnail !== undefined)
         .map(q => q.thumbnail);
 
-        console.log("adasdasdasdasd: " + links);
-
-        return data;
+        //console.log("adasdasdasdasd: " + links);
+        const link = links[0];
+        
+        return link;
     }
     catch (error) {
         console.error('Error fetching cities:', error);

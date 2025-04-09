@@ -1,66 +1,92 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Platform, Image } from 'react-native';
+import { Platform, Image, View } from 'react-native';
 
 
 export default function TabLayout() {
 
   return (
     <Tabs
-      //rinitialRouteName="home"
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#C4D9FF',
           height: "10%",
+          backgroundColor: '#C4D9FF',
         },
       }}
     >
-
-<Tabs.Screen
+      <Tabs.Screen
+        name="home"
+        options={{
+          tabBarLabel: " ",
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+            {focused
+              ? <Image
+              source={require('../../assets/icons/Home-f.png')}
+              style = {styles.icon}
+            />
+              : <Image
+              source={require('../../assets/icons/Home.png')}
+              style = {styles.icon}
+            />
+            }
+            
+          </View>
+          )
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          tabBarLabel: " ",
+          tabBarIcon: ({ color, focused }) => (
+            <View>
+              {focused
+                ? <Image
+                source={require('../../assets/icons/Profile-f.png')}
+                style = {styles.icon}
+              />
+                : <Image
+                source={require('../../assets/icons/Profile.png')}
+                style = {styles.icon}
+              />
+              }
+              
+            </View>
+          )
+        }}
+      />
+      <Tabs.Screen
         name="index"
         options={{
-          tabBarStyle: {
-           // display: 'none',
-          },
-        }}
-      />
-
-<Tabs.Screen
-        name="login"
-        options={{
-          tabBarStyle: {
-            display: 'none',
-          },
-        }}
-      />
-
-<Tabs.Screen
-        name="register"
-        options={{
-          tabBarStyle: {
-            display: 'none',
-          },
+          href: null,
+          //tabBarStyle: { display: "none" }
         }}
       />
 
       <Tabs.Screen
-        name="home"
+        name="login"
         options={{
-          tabBarIcon: ({ color, focused }) => (
-            <Image
-              source={require('../../assets/icons/Home.png')}
-              style={{
-                width: 24,
-                height: 24,
-                backgroundColor: focused ? '#A0B5DB' : 'transparent',
-                borderRadius: 12,
-              }}
-            />
-          )
+          href: null,
+          tabBarStyle: { display: "none" }
         }}
       />
 
+      <Tabs.Screen
+        name="register"
+        options={{
+          href: null,
+          tabBarStyle: { display: "none" }
+        }}
+      />
     </Tabs>
   );
+}
+
+const styles = {
+  icon: {
+    width:40,
+    height: 40,
+  }
 }
