@@ -15,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/crimson-text": "^0.3.0",
     "@expo-google-fonts/inter": "^0.3.0",
     "@expo-google-fonts/lora": "^0.3.0",
     "@expo-google-fonts/merriweather": "^0.3.0",

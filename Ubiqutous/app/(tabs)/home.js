@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, ScrollView, TouchableOpacity  } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import AppLoading from 'expo-app-loading';
-import { useRouter } from 'expo-router';
+import { useNavigation, Link } from 'expo-router';
 import SearchBar from '../../components/SearchBar';
 import { fetchImages } from '../../api/api.js';
 
 export default function Home() {
+    const navigation = useNavigation();
     const [searchText, setSearchText] = useState('');
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
@@ -29,13 +30,14 @@ export default function Home() {
                     urls.push(data);
                     console.log("adasdasdasdasd: " + data);
                 }
+                console.log("adasdasdasdasd: " + urls[0]);
                 setUrls(urls);
             }
             catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
-        //fetchData();
+        fetchData();
     }, [])
 
     const handleSearch = (text) => {
@@ -67,16 +69,26 @@ export default function Home() {
                 //showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.scrollContainer}
                 style={styles.countries}>
-                {popularTouristCountries.map((country, index) => {
-                    return (
-                        <View style={styles.countryBlock} key={index}>
-                            <Image
-                                source={{ uri: urls[index] }}
-                                style={styles.countryImg} />
-                            <Text style={{ padding: '5%' }}>{country}</Text>
-                        </View>
-                    )
-                })
+
+                {
+                    urls.length > 0 ?
+                        popularTouristCountries.map((country, index) => {
+                            return (
+                                <TouchableOpacity 
+                                    style={styles.countryBlock} key={index}
+                                    onPress={() => navigation.navigate('country', {
+                                        country: country,
+                                        urls: urls[index]
+                                    })}>
+                                    <Image
+                                        source={{ uri: urls[index][0] }}
+                                        style={styles.countryImg} />
+                                    <Text style={{ padding: '5%' }}>{country}</Text>
+                                </TouchableOpacity >
+                            )
+                        })
+                        :
+                        <Text style={{ padding: '5%' }}>Loading...</Text>
                 }
 
             </ScrollView>
@@ -119,7 +131,7 @@ const styles = StyleSheet.create({
     },
     countries: {
         width: '100%',
-        height: 200, 
+        height: 200,
     },
     scrollContainer: {
         flexDirection: 'row',

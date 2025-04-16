@@ -38,9 +38,9 @@ export const fetchImages = async (query) => {
         .map(q => q.thumbnail);
 
         //console.log("adasdasdasdasd: " + links);
-        const link = links[0];
+        //const link = links[0];
         
-        return link;
+        return links;
     }
     catch (error) {
         console.error('Error fetching cities:', error);
