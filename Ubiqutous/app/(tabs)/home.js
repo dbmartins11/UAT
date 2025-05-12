@@ -5,7 +5,7 @@ import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import AppLoading from 'expo-app-loading';
 import { useNavigation, Link } from 'expo-router';
 import SearchBar from '../../components/SearchBar';
-import { fetchImages } from '../../api/api.js';
+import { fetchImages, fetchImagesUnsplash } from '../../api/api.js';
 
 export default function Home() {
     const navigation = useNavigation();
@@ -16,9 +16,11 @@ export default function Home() {
     });
     const [urls, setUrls] = useState([]);
     const popularTouristCountries = [
-        "Portugal", "France",
-        "Spain", "USA", "China", "Italy", "Turkey",
-        "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
+        "Portugal",
+        "France",
+        // "Spain", "USA", 
+        // "China", "Italy", "Turkey",
+        // "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
     ];
 
     useEffect(() => {
@@ -26,11 +28,10 @@ export default function Home() {
             try {
                 const urls = [];
                 for (const country of popularTouristCountries) {
-                    const data = await fetchImages(country);
+                    //const data = await fetchImages(country);
+                    const data = await fetchImagesUnsplash(country + " landmarks and tourism");
                     urls.push(data);
-                    console.log("adasdasdasdasd: " + data);
                 }
-                console.log("adasdasdasdasd: " + urls[0]);
                 setUrls(urls);
             }
             catch (error) {
@@ -81,7 +82,7 @@ export default function Home() {
                                         urls: urls[index]
                                     })}>
                                     <Image
-                                        source={{ uri: urls[index][0] }}
+                                        source={{ uri: urls[index][1] }}
                                         style={styles.countryImg} />
                                     <Text style={{ padding: '5%' }}>{country}</Text>
                                 </TouchableOpacity >
