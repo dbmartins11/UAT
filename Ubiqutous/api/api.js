@@ -1,7 +1,8 @@
 // https://restcountries.com/v3.1/all?fields=name 
 //import SerpApi from 'google-search-results-nodejs';
 
-const serpapiKey = "9a0b8b66a8c2ff39a093921cc324852293c5e052eed48a7e65be066e3db34a3d";
+//const serpapiKey = "9a0b8b66a8c2ff39a093921cc324852293c5e052eed48a7e65be066e3db34a3d";
+const serpapiKey = "19c034da5f127caa07dd49deb7265b97507d0617364b68ee20b53ce350967e2a";
 const unsplashKeyAccess = "krp2JlVVLvA0dtFnG4gLRV1DALKg-YNGslcYxWn5YO8";
 const unsplashKeySecret = "Ay8ZfLqVAPSuDO_ZXnF9iWa-4_qQef6Pqla-nIxd70w";
 
@@ -10,19 +11,20 @@ export const fetchCities = async (country) => {
     try {
         const url = `https://serpapi.com/search.json?engine=google&q=Cities+in+${country}&api_key=${serpapiKey}`;
         const response = await fetch(url);
+        console.log('URL: ' + url);
         //const response = await fetch(`https://serpapi.com/search.json?engine=google&q=Cities+in+${country}&api_key=${serpapiKey}`);
         const data = await response.json();
         const table = data.related_questions.find(q =>
-            q.table !== undefined
-        ).table;
+            q.list !== undefined
+        ).list;
+        console.log("adasdasdasdasd: " + table);
 
         table.forEach(element => {
-            let city = element[0];
+            let city = element.replace('.', '');
             if(city !== "City"){
                 cities.push(city);
             }
         });
-        //console.log("adasdasdasdasd: " + cities);
         return cities
     }
     catch (error) {
@@ -58,14 +60,17 @@ export const fetchImages = async (query) => {
 
 export const fetchImagesUnsplash = async (city) => {
     try{
-        const response = await fetch(`https://api.unsplash.com/search/photos?query=${city}`, {
+        const url = `https://api.unsplash.com/search/photos?query=${city}`;
+        const response = await fetch(url, {
             headers: {
                 Authorization: `Client-ID ${unsplashKeyAccess}`
             }
         });
+        
+        console.log('URL: ' + url);
         const data = await response.json();
         const urls = data.results.map(res => res.urls.raw);
-        console.log("API IMAGES UNSPLASH: " + JSON.stringify(urls, null, 2));
+        //console.log("API IMAGES UNSPLASH: " + JSON.stringify(urls, null, 2));
         return urls;
     }catch (error) {
         console.error('Error fetching images Unsplash:', error);

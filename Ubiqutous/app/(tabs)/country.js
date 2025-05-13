@@ -7,6 +7,7 @@ import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchCities, fetchImages, fetchImagesUnsplash } from '../../api/api.js';
 
+
 export default function Country() {
     const route = useRoute();
     const { country, urls } = route.params;
@@ -19,62 +20,68 @@ export default function Country() {
         OpenSans_400Regular,
         CrimsonText_400Regular,
     });
- 
+
     useEffect(() => {
-        const getCountryImages =  () => { 
-                const indImgs = [];
-                while (indImgs.length < 4) {
-                    const randomIndex = Math.floor(Math.random() * urls.length);
-                    
-                    if (!indImgs.includes(randomIndex) ) {      
-                        indImgs.push(randomIndex);
-                    }
-                } 
-                console.log("IMGS: " + indImgs[0] + ", " + indImgs[1] + ", " + indImgs[2] + ", " + indImgs[3]);
-                setImages(indImgs);                
+        const getCountryImages = () => {
+            console.log("1")
+            const indImgs = [];
+            while (indImgs.length < 4) {
+                const randomIndex = Math.floor(Math.random() * urls.length);
+
+                if (!indImgs.includes(randomIndex)) {
+                    indImgs.push(randomIndex);
+                }
+            }
+            console.log("IMGS: " + indImgs[0] + ", " + indImgs[1] + ", " + indImgs[2] + ", " + indImgs[3]);
+            setImages(indImgs);
         };
 
-        const fetchCitiesNames = async (country) => {
-            const cities = [];
+        const fetchData = async (country) => {
+            console.log("2")
+            let dataNames = [];
             try {
-                const data = await fetchCities(country);
-                cities.push(data[0]);
-                cities.push(data[1]);
-                setCities(cities);
-                console.log("CITIES: " + data[0] + ", " + data[1]);
+                dataNames = await fetchCities(country + "+all");
+                console.log("CITIES: " + dataNames);
+                setCities(dataNames);
+                console.log("3")
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching the cities\' names:', error);
+            }
+            try {
+                console.log("4")
+                let urls = [];
+                for (const city of dataNames) {
+                    {
+                        const data = await fetchImagesUnsplash(city);
+                        urls.push(data);
+                    }
+                }
+                console.log("CITIES IMGS: " + urls.length);
+                console.log("CITIES IMGS: " + urls[0].length);
+                setCitiesImg(urls);
+                console.log("5")
+            } catch (error) {
+                console.error('Error fetching the cities\' images:', error);
             }
         }
 
-        const fetchCitiesImages = async (cities) => {
-            try {
-                const urlsCities = [];
-                for (let i = 0; i < cities.length; i++) {
-                    const data = await fetchImagesUnsplash(cities[i]);
-                    urlsCities.push(data);
-                    console.log("CITIES IMAGES: " + cities[i]);
-                }
-                setCitiesImg(urlsCities);
-                //console.log("CITIES IMAGES: " + urlsCities[0]); 
-            }
-            catch (error) {
-                console.error('Error fetching data:', error);
-            }
+        fetchData(country);
+
+        if (urls || urls.length !== 0) {
+            console.log("6")
+            getCountryImages();
         }
-        if(urls || urls.length !== 0){
-            getCountryImages(); // Chama a função assíncrona
-        }
-        fetchCitiesNames(country);
-        fetchCitiesImages(cities);
-    }, [urls]);
+
+        console.log("7")
+
+    }, [])
 
     if (!fontsLoaded) {
         return <AppLoading />;
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#fff', paddingHorizontal: 10, paddingVertical: 10 }}>
+        <View style={{ flex: 1, padding: 10 }}>
             <View style={styles.imgBlock}>
                 {urls[images[0]] && (
                     <Image
@@ -112,34 +119,44 @@ export default function Country() {
                 :
                 <Text style={styles.title}>Undefined</Text>
             }
-            {/* {cities.length > 0 ? ( */}
-                {cities.map((city, index) => (
-                    <View key={index} style={styles.cities}>
-                        <Text style={{ 
-                            fontFamily: 'OpenSans_400Regular', 
-                            fontSize: 17,
-                            fontWeight: 'bold',
-                            textTransform: 'uppercase',
-                            }}>
-                            {city}
-                        </Text>
-                        {/* <Image
-                            source={{ uri: citiesImg[0] }}
-                            style={styles.thirdImg}>
-                        </Image>
-                        <Image
-                            source={{ uri: citiesImg[1] }}
-                            style={styles.thirdImg}>
-                        </Image>
-                        <Image
-                            source={{ uri: citiesImg[2] }}
-                            style={styles.thirdImg}>
-                        </Image> */}
-                    </View>
-                ))}
-            {/* ) : (
-                <Text style={styles.title}>Loading...</Text>
-            )} */}
+            <ScrollView
+                horizontal={false}
+                showsVerticalScrollIndicator={true}
+                contentContainerStyle={styles.scrollContainer}
+            >
+                {citiesImg.length > 0 ? (
+                    cities.map((city, index) => (
+                        <View key={index} style={styles.cities}>
+                            <View style={{ width: '30%', justifyContent: 'center' }}>
+                                <Text style={{
+                                    fontFamily: 'OpenSans_400Regular',
+                                    fontSize: 17,
+                                    fontWeight: 'bold',
+                                    textTransform: 'uppercase',
+                                }}>
+                                    {city}
+                                </Text>
+                            </View>
+                            <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
+                                <Image
+                                    source={{ uri: citiesImg[index][0] }}
+                                    style={styles.cityImg}>
+                                </Image>
+                                <Image
+                                    source={{ uri: citiesImg[index][1] }}
+                                    style={styles.cityImg}>
+                                </Image>
+                                <Image
+                                    source={{ uri: citiesImg[index][2] }}
+                                    style={styles.cityImg}>
+                                </Image>
+                            </View>
+                        </View>
+                    ))
+                ) : (
+                    <Text style={styles.title}>Loading...</Text>
+                )}
+            </ScrollView>
         </View>
     );
 }
@@ -159,15 +176,15 @@ const styles = StyleSheet.create({
         gap: '2%'
     },
     imgBlock_1: {
-        width: '50%',
+        width: '48%',
         //height: '100%',
         display: 'flex',
         flexDirection: 'column',
         gap: '2%'
     },
     imgBlock_2: {
-        width: '100%',
-        height: '50%',
+        width: '98%',
+        height: '48%',
         display: 'flex',
         flexDirection: 'row',
         gap: '2%'
@@ -175,29 +192,42 @@ const styles = StyleSheet.create({
     firstImg: {
         width: '50%',
         height: '100%',
-        //borderRadius: 10,
+        borderRadius: 5,
         resizeMode: 'cover',
     },
     secondImg: {
         width: '100%',
         height: '50%',
         resizeMode: 'cover',
-        //borderRadius: 10,
+        borderRadius: 5,
     },
     thirdImg: {
         width: '50%',
         height: '100%',
         resizeMode: 'cover',
-        //borderRadius: 10,  
+        borderRadius: 5,
     },
-    cities:{
-        width: '90%',
-        height: '15%',
-        padding: '5%',
-        justifyContent: 'center',
-        marginHorizontal: 'auto',
+    cities: {
+        width: '100%',
+        height: 120,
+        padding: '2%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 10,
         borderTopWidth: 1,
         borderTopColor: '#A0B5DB',
-    }
+    },
+
+    cityImg: {
+        width: '30%',
+        height: '100%',
+        borderRadius: 10,
+        marginRight: '5%',
+    },
+
+    scrollContainer: {
+        flexGrow: 1,
+        paddingBottom: 20,
+    },
 
 });
