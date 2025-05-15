@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,13 +10,46 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { signOut } from 'firebase/auth';
+import { auth, db } from '../../firebase/firebaseConf';
+import { doc, getDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ProfileScreen() {
   const router = useRouter();
 
-  // Dados mockup (a substituir futuramente por dados reais do Firebase)
-  const username = 'Username';
-  const aboutMe = 'about me text';
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [aboutMe, setAboutMe] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchUserData = async () => {
+        try {
+          const user = auth.currentUser;
+          if (!user) return;
+
+          const docRef = doc(db, 'users', user.uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setUsername(data.username || 'Unnamed');
+            setEmail(data.email || user.email);
+            setAboutMe(data.aboutMe || '');
+          } else {
+            console.log('No such document!');
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
+        }
+      };
+
+      fetchUserData();
+    }, [])
+  );
+
+  const firstLetter = username.charAt(0).toUpperCase();
 
   const visitedCountries = [
     { name: 'Madeira', flag: '🇵🇹', image: require('../../assets/images/madeira.png') },
@@ -26,8 +59,17 @@ export default function ProfileScreen() {
 
   const myLists = [
     { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/krakow.png') },
-    { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/madeira.png') },
+    { title: 'Minha Lista 2', description: 'descrição', image: require('../../assets/images/madeira.png') },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.replace('/login');
+    } catch (error) {
+      alert('Error during logout: ' + error.message);
+    }
+  };
 
   return (
     <ImageBackground
@@ -35,10 +77,11 @@ export default function ProfileScreen() {
       style={styles.background}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Image
-          source={require('../../assets/images/user_placeholder.png')}
-          style={styles.avatar}
-        />
+        {/* Avatar com inicial */}
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{firstLetter}</Text>
+        </View>
+
         <Text style={styles.username}>{username}</Text>
         <Text style={styles.about}>{aboutMe}</Text>
 
@@ -77,8 +120,12 @@ export default function ProfileScreen() {
           </View>
         ))}
 
-        <TouchableOpacity style={styles.editButton} onPress={() => alert('Em breve!')}>
+        <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile')}>
           <Text style={styles.editButtonText}>Editar Perfil</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
     </ImageBackground>
@@ -98,7 +145,15 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
+    backgroundColor: '#3A5BA0',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
+  },
+  avatarText: {
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold',
   },
   username: {
     fontWeight: '600',
@@ -187,6 +242,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   editButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  logoutButton: {
+    backgroundColor: '#a03a3a',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  logoutButtonText: {
     color: 'white',
     fontWeight: 'bold',
   },

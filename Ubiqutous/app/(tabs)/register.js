@@ -10,11 +10,9 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, getDocs, collection, query, where } from 'firebase/firestore';
-import { auth, db, storage } from '../../firebase/firebaseConf';
+import { auth, db } from '../../firebase/firebaseConf';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -28,7 +26,6 @@ export default function RegisterScreen() {
   const [repeatPassword, setRepeatPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showRepeatPassword, setShowRepeatPassword] = useState(false);
-  const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useFocusEffect(
@@ -38,30 +35,11 @@ export default function RegisterScreen() {
         setEmail('');
         setPassword('');
         setRepeatPassword('');
-        setImage(null);
         setShowPassword(false);
         setShowRepeatPassword(false);
       };
     }, [])
   );
-
-  const pickImage = async () => {
-    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissionResult.granted) {
-      alert('Permission to access camera roll is required!');
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
 
   const handleRegister = async () => {
     if (!username || !email || !password || !repeatPassword) {
@@ -92,33 +70,12 @@ export default function RegisterScreen() {
         return;
       }
 
-      let photoURL = '';
-
-      // Handle image upload first (if image is selected)
-      if (image) {
-        try {
-          const response = await fetch(image);
-          const blob = await response.blob();
-          const tempUid = `${Date.now()}-${username}`; // temporary ref in case Auth fails
-          const storageRef = ref(storage, `profilePhotos/${tempUid}.jpg`);
-          await uploadBytes(storageRef, blob);
-          photoURL = await getDownloadURL(storageRef);
-        } catch (uploadErr) {
-          setLoading(false);
-          Alert.alert('Error', 'Failed to upload image.');
-          return;
-        }
-      }
-
-      // Now create the user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const uid = userCredential.user.uid;
 
-      // Save to Firestore
       await setDoc(doc(db, 'users', uid), {
         username,
         email,
-        photoURL,
       });
 
       setLoading(false);
@@ -141,7 +98,7 @@ export default function RegisterScreen() {
       style={styles.background}
       resizeMode="cover"
     >
-      <TouchableOpacity style={styles.backIcon} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/')}>
         <Ionicons name="arrow-back" size={28} color="black" />
       </TouchableOpacity>
 
@@ -202,17 +159,6 @@ export default function RegisterScreen() {
           </View>
         </View>
 
-        <View style={styles.profileUploadRow}>
-          <View style={styles.profileCircle}>
-            {image && (
-              <Image source={{ uri: image }} style={{ width: 60, height: 60, borderRadius: 30 }} />
-            )}
-          </View>
-          <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
-            <Text style={{ color: 'white', fontWeight: 'bold' }}>Upload Profile Photo</Text>
-          </TouchableOpacity>
-        </View>
-
         <TouchableOpacity style={styles.loginButton} onPress={handleRegister} disabled={loading}>
           {loading ? (
             <ActivityIndicator color="#fff" />
@@ -264,26 +210,6 @@ const styles = StyleSheet.create({
   passwordRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  profileUploadRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 15,
-    justifyContent: 'space-between',
-  },
-  profileCircle: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#D9E8FA',
-    borderRadius: 30,
-    overflow: 'hidden',
-  },
-  uploadButton: {
-    backgroundColor: 'black',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 5,
-    elevation: 4,
   },
   loginButton: {
     backgroundColor: '#3A5BA0',
