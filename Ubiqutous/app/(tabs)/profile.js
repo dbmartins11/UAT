@@ -128,7 +128,7 @@ export default function ProfileScreen() {
           <Text style={styles.logoutButtonText}>Logout</Text>
         </TouchableOpacity>
       </ScrollView>
-    </ImageBackground>
+    </ImageBackground> 
   );
 }
 
