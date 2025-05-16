@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -7,27 +7,24 @@ import {
   StyleSheet,
   ImageBackground,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { auth, db } from '../../firebase/firebaseConf';
-import { getDoc, doc, updateDoc } from 'firebase/firestore';
-import { ScrollView } from 'react-native';
-import { KeyboardAvoidingView, Platform } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback } from 'react';
-
-
 import {
   updateEmail,
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
 } from 'firebase/auth';
+import { getDoc, doc, updateDoc } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function EditProfileScreen() {
   const router = useRouter();
-
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [aboutMe, setAboutMe] = useState('');
@@ -35,34 +32,47 @@ export default function EditProfileScreen() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [originalData, setOriginalData] = useState({ username: '', email: '', aboutMe: '' });
 
   useFocusEffect(
-  useCallback(() => {
-    return () => {
-      setCurrentPassword('');
-      setNewPassword('');
-      setShowPassword(false);
-      setShowCurrentPassword(false);
-    };
-  }, [])
-);
+    useCallback(() => {
+      return () => {
+        // Reverter dados se sair sem guardar
+        setUsername(originalData.username);
+        setEmail(originalData.email);
+        setAboutMe(originalData.aboutMe);
+        setCurrentPassword('');
+        setNewPassword('');
+        setShowPassword(false);
+        setShowCurrentPassword(false);
+      };
+    }, [originalData])
+  );
 
   useEffect(() => {
     const fetchData = async () => {
-      const user = auth.currentUser;
-      if (!user) return;
-
-      const docRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setUsername(data.username || '');
-        setEmail(data.email || user.email);
-        setAboutMe(data.aboutMe || '');
+      try {
+        const user = auth.currentUser;
+        if (!user) return;
+        await user.reload();
+        const updatedUser = auth.currentUser;
+        const docSnap = await getDoc(doc(db, 'users', updatedUser.uid));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const current = {
+            username: data.username || '',
+            email: data.email || updatedUser.email,
+            aboutMe: data.aboutMe || '',
+          };
+          setUsername(current.username);
+          setEmail(current.email);
+          setAboutMe(current.aboutMe);
+          setOriginalData(current);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
       }
     };
-
     fetchData();
   }, []);
 
@@ -71,9 +81,9 @@ export default function EditProfileScreen() {
     if (!user) return;
 
     try {
-      // ⚠️ Se vai alterar email ou password, tem de reautenticar com password atual
-      if ((email !== user.email || newPassword.length > 0) && currentPassword.length === 0) {
-        Alert.alert('Erro', 'Enter your current password to confirm sensitive changes.');
+      const changingSensitiveData = email !== user.email || newPassword.length > 0;
+      if (changingSensitiveData && currentPassword.length === 0) {
+        Alert.alert('Authentication required', 'Enter current password to confirm changes.');
         return;
       }
 
@@ -82,32 +92,47 @@ export default function EditProfileScreen() {
         await reauthenticateWithCredential(user, credential);
       }
 
-      // Alterar email se necessário
+      if (!user.emailVerified && email !== user.email) {
+        Alert.alert(
+          'Email not verified',
+          'Please verify your current email before changing it.',
+          [
+            {
+              text: 'Send verification',
+              onPress: async () => {
+                await user.sendEmailVerification();
+                Alert.alert('Verification email sent!');
+              },
+            },
+            { text: 'OK' },
+          ]
+        );
+        return;
+      }
+
       if (email !== user.email) {
         await updateEmail(user, email);
       }
 
-      // Alterar password se necessário
       if (newPassword.length > 0) {
         if (newPassword.length < 6) {
-          Alert.alert('Erro', 'A nova password deve ter pelo menos 6 caracteres.');
+          Alert.alert('Weak password', 'New password must be at least 6 characters.');
           return;
         }
         await updatePassword(user, newPassword);
       }
 
-      // Guardar dados no Firestore
       await updateDoc(doc(db, 'users', user.uid), {
         username,
         email,
         aboutMe,
       });
 
-      Alert.alert('Profile updated successfully!');
+      Alert.alert('Success', 'Profile updated successfully!');
       router.replace('/profile');
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error updating profile', error.message);
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Error', err.message);
     }
   };
 
@@ -116,19 +141,17 @@ export default function EditProfileScreen() {
       source={require('../../assets/images/background.png')}
       style={styles.background}
     >
-
       <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1 }}
-          keyboardVerticalOffset={80} // Ajustável
-      ></KeyboardAvoidingView>
-
-      <ScrollView contentContainerStyle={styles.container}  keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={80}
+      />
+      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <TouchableOpacity style={styles.backIcon} onPress={() => router.replace('/profile')}>
           <Ionicons name="arrow-back" size={28} color="black" />
         </TouchableOpacity>
 
-        <Text style={styles.title}>Editar Perfil</Text>
+        <Text style={styles.title}>Edit Profile</Text>
 
         <TextInput
           style={styles.input}
@@ -154,7 +177,6 @@ export default function EditProfileScreen() {
           onChangeText={setAboutMe}
         />
 
-        {/* 🔑 Password atual */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -173,7 +195,6 @@ export default function EditProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* 🔒 Nova password */}
         <View style={styles.passwordContainer}>
           <TextInput
             style={[styles.input, { flex: 1, marginBottom: 0 }]}
@@ -193,7 +214,7 @@ export default function EditProfileScreen() {
         </View>
 
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Text style={styles.saveButtonText}>Guardar Alterações</Text>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
         </TouchableOpacity>
       </ScrollView>
     </ImageBackground>
@@ -210,7 +231,6 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 80,
   },
-
   backIcon: {
     position: 'absolute',
     top: 50,
