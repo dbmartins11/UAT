@@ -1,73 +1,53 @@
-// app/(tabs)/settings.js
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Switch,
-  TouchableOpacity,
-  useWindowDimensions,
-  StyleSheet,
-} from 'react-native';
+import React from 'react';
+import { View, Text, Switch, Picker, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../components/ThemeContext';
-import { Ionicons } from '@expo/vector-icons';
 
-export default function SettingsPage() {
+const SettingsScreen = () => {
+  const { t, i18n } = useTranslation();
   const { darkMode, toggleTheme } = useTheme();
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height >= width;
 
-  const [language, setLanguage] = useState('en');
-
-  const handleLanguageChange = () => {
-    setLanguage(prev => (prev === 'en' ? 'pt' : 'en'));
-    // Aqui podes guardar em AsyncStorage ou contexto
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: darkMode ? '#111' : '#fff' }]}>
-      <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>⚙️ Settings</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>{t('settings')}</Text>
 
-      {/* Tema Escuro */}
-      <View style={styles.row}>
-        <Text style={[styles.label, { color: darkMode ? '#ccc' : '#333' }]}>Dark Mode</Text>
+      <View style={styles.setting}>
+        <Text>{t('dark_mode')}</Text>
         <Switch value={darkMode} onValueChange={toggleTheme} />
       </View>
 
-      {/* Idioma */}
-      <TouchableOpacity style={styles.row} onPress={handleLanguageChange}>
-        <Text style={[styles.label, { color: darkMode ? '#ccc' : '#333' }]}>Language</Text>
-        <Text style={[styles.value, { color: darkMode ? '#ccc' : '#000' }]}>
-          {language === 'en' ? 'English' : 'Português'}
-        </Text>
-        <Ionicons name="chevron-forward" size={20} color={darkMode ? '#ccc' : '#333'} />
-      </TouchableOpacity>
+      <View style={styles.setting}>
+        <Text>{t('language')}</Text>
+        <Picker
+          selectedValue={i18n.language}
+          onValueChange={(itemValue) => changeLanguage(itemValue)}
+        >
+          <Picker.Item label={t('english')} value="en" />
+          <Picker.Item label={t('portuguese')} value="pt" />
+          <Picker.Item label={t('slovenian')} value="sl" />
+        </Picker>
+      </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    backgroundColor: darkMode ? '#000' : '#fff',
+    padding: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 30,
+    fontSize: 24,
+    marginBottom: 24,
   },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderBottomWidth: 0.5,
-    borderColor: '#ccc',
-  },
-  label: {
-    fontSize: 16,
-  },
-  value: {
-    fontSize: 16,
-    marginHorizontal: 10,
+  setting: {
+    marginBottom: 16,
   },
 });
+
+export default SettingsScreen;

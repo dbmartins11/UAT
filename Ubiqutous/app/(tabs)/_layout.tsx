@@ -3,6 +3,8 @@ import React from 'react';
 import { Platform, Image, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemeProvider } from '../../components/ThemeContext'; // Garante que o caminho está certo!
+import './i18n';
+
 
 export default function TabLayout() {
   return (
