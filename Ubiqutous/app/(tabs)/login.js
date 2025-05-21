@@ -18,6 +18,7 @@ export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // 👁️ Estado para mostrar/esconder
 
   // 🧼 Limpa os campos ao sair da página
   useFocusEffect(
@@ -25,6 +26,7 @@ export default function LoginScreen() {
       return () => {
         setEmail('');
         setPassword('');
+        setShowPassword(false);
       };
     }, [])
   );
@@ -45,7 +47,7 @@ export default function LoginScreen() {
       resizeMode="cover"
     >
       {/* 🔙 Botão de voltar */}
-      <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.replace('/')}>
         <Ionicons name="arrow-back" size={28} color="#000" />
       </TouchableOpacity>
 
@@ -71,12 +73,19 @@ export default function LoginScreen() {
         <View style={styles.inputContainer}>
           <Text style={styles.icon}>🔒</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { flex: 1 }]}
             placeholder="Password"
-            secureTextEntry
+            secureTextEntry={!showPassword}
             value={password}
             onChangeText={setPassword}
           />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? 'eye-off' : 'eye'}
+              size={20}
+              color="gray"
+            />
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
@@ -144,7 +153,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   input: {
-    flex: 1,
     fontSize: 16,
   },
   loginButton: {
