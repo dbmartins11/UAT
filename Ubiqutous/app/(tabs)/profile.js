@@ -18,6 +18,8 @@ import { useTheme } from '../../components/ThemeContext';
 import { getCurrentLanguage, translate } from '../../utils/languageUtils';
 
 
+
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { darkMode } = useTheme();
@@ -27,32 +29,39 @@ export default function ProfileScreen() {
   const [language, setLanguage] = useState('en');
 
   useFocusEffect(
-    useCallback(() => {
-      const fetchUserData = async () => {
-        try {
-          const user = auth.currentUser;
-          if (!user) return;
+  useCallback(() => {
+    let isActive = true;
 
-          const lang = await getCurrentLanguage();
-          setLanguage(lang);
+    const fetchData = async () => {
+      try {
+        const lang = await getCurrentLanguage();
+        if (isActive) setLanguage(lang);
 
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
+        const user = auth.currentUser;
+        if (!user) return;
 
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            setUsername(data.username || 'Unnamed');
-            setEmail(data.email || user.email);
-            setAboutMe(data.aboutMe || '');
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists() && isActive) {
+          const data = docSnap.data();
+          setUsername(data.username || 'Unnamed');
+          setEmail(data.email || user.email);
+          setAboutMe(data.aboutMe || '');
         }
-      };
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
 
-      fetchUserData();
-    }, [])
-  );
+    fetchData();
+
+    return () => {
+      isActive = false;
+    };
+  }, [])
+);
+
 
   const firstLetter = username.charAt(0).toUpperCase();
 

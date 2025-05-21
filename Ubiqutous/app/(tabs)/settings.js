@@ -8,13 +8,34 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../components/ThemeContext';
+import { useTheme } from '../../components/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 
 const translations = {
-  en: { title: 'Settings', darkMode: 'Dark Mode', language: 'Language', english: 'English', portuguese: 'Portuguese', slovenian: 'Slovenian' },
-  pt: { title: 'Definições', darkMode: 'Modo Escuro', language: 'Idioma', english: 'Inglês', portuguese: 'Português', slovenian: 'Esloveno' },
-  sl: { title: 'Nastavitve', darkMode: 'Temni način', language: 'Jezik', english: 'Angleščina', portuguese: 'Portugalščina', slovenian: 'Slovenščina' },
+  en: {
+    title: 'Settings',
+    darkMode: 'Dark Mode',
+    language: 'Language',
+    english: 'English',
+    portuguese: 'Portuguese',
+    slovenian: 'Slovenian',
+  },
+  pt: {
+    title: 'Definições',
+    darkMode: 'Modo Escuro',
+    language: 'Idioma',
+    english: 'Inglês',
+    portuguese: 'Português',
+    slovenian: 'Esloveno',
+  },
+  sl: {
+    title: 'Nastavitve',
+    darkMode: 'Temni način',
+    language: 'Jezik',
+    english: 'Angleščina',
+    portuguese: 'Portugalščina',
+    slovenian: 'Slovenščina',
+  },
 };
 
 export default function SettingsPage() {
@@ -22,7 +43,14 @@ export default function SettingsPage() {
   const isPortrait = height >= width;
   const { darkMode, toggleTheme } = useTheme();
   const [language, setLanguage] = useState('en');
+
   const t = translations[language];
+
+  const languageLabels = {
+    en: t.english,
+    pt: t.portuguese,
+    sl: t.slovenian,
+  };
 
   useEffect(() => {
     const loadLang = async () => {
@@ -48,10 +76,14 @@ export default function SettingsPage() {
       </View>
 
       <Text style={[styles.subTitle, { color: darkMode ? '#ccc' : '#333' }]}>{t.language}</Text>
+
       {['en', 'pt', 'sl'].map((lang) => (
         <TouchableOpacity key={lang} onPress={() => changeLanguage(lang)} style={styles.langButton}>
-          <Text style={{ color: language === lang ? '#2894B0' : darkMode ? '#fff' : '#000' }}>
-            {t[lang]}
+          <Text style={{
+            color: language === lang ? '#2894B0' : darkMode ? '#fff' : '#000',
+            fontWeight: language === lang ? 'bold' : 'normal'
+          }}>
+            {languageLabels[lang]}
           </Text>
         </TouchableOpacity>
       ))}
