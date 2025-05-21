@@ -5,14 +5,14 @@ import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
-import { fetchCities, fetchImages, fetchImagesUnsplash } from '../../api/api.js';
+import { fetchMonuments, fetchImagesUnsplash } from '../../api/api.js';
 import { useNavigation } from 'expo-router';
 
 
 export default function Country() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { country, urls } = route.params;
+    const { city, urls } = route.params;
 
     const [images, setImages] = useState([]);
     const [cities, setCities] = useState([]);
@@ -28,7 +28,6 @@ export default function Country() {
             const indImgs = [];
             while (indImgs.length < 4) {
                 const randomIndex = Math.floor(Math.random() * urls.length);
-
                 if (!indImgs.includes(randomIndex)) {
                     indImgs.push(randomIndex);
                 }
@@ -36,31 +35,31 @@ export default function Country() {
             setImages(indImgs);
         };
 
-        const fetchData = async (country) => {
+        const fetchData = async (city) => {
             let dataNames = [];
             try {
-                dataNames = await fetchCities(country + "+all");
+                dataNames = await fetchMonuments(`${city}`);
                 setCities(dataNames);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
             try {
-                const urls = await Promise.all(
-                    dataNames.map(async (city) => {
+                let urls = [];
+                for (const city of dataNames) {
+                    {
                         const data = await fetchImagesUnsplash(city);
-                        return data;
-                    })
-                );
+                        urls.push(data);
+                    }
+                }
                 setCitiesImg(urls);
             } catch (error) {
                 console.error('Error fetching the images:', error);
             }
         }
 
-        fetchData(country);
+        fetchData(city);
 
         if (urls || urls.length !== 0) {
-            console.log("6")
             getCountryImages();
         }
 
@@ -104,8 +103,8 @@ export default function Country() {
                     </View>
                 </View>
             </View>
-            {country ?
-                <Text style={styles.title}>{country}</Text>
+            {city ?
+                <Text style={styles.title}>{city}</Text>
                 :
                 <Text style={styles.title}>Undefined</Text>
             }
@@ -119,10 +118,11 @@ export default function Country() {
                         <TouchableOpacity
                             key={index}
                             style={styles.cities}
-                            onPress={() => navigation.navigate('city', {
-                                        city: city,
-                                        urls: citiesImg[index],
-                                    })}>
+                            // onPress={() => navigation.navigate('country', {
+                            //             country: city,
+                            //             urls: cities[index],
+                            //         })}
+                            >
                             <View style={{ width: '30%', justifyContent: 'center' }}>
                                 <Text style={{
                                     fontFamily: 'OpenSans_400Regular',
