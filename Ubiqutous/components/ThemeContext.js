@@ -1,27 +1,39 @@
 // components/ThemeContext.js
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Appearance } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Create context
+// Criação do contexto
 const ThemeContext = createContext();
 
-// Hook to use the theme
+// Hook de acesso ao contexto
 export const useTheme = () => useContext(ThemeContext);
 
-// Provider component
+// Componente de provider
 export const ThemeProvider = ({ children }) => {
-  const colorScheme = Appearance.getColorScheme(); // 'light' or 'dark'
-  const [darkMode, setDarkMode] = useState(colorScheme === 'dark');
+  const [darkMode, setDarkMode] = useState(false);
 
-  const toggleTheme = () => setDarkMode((prev) => !prev);
-
+  // Carrega a preferência salva (ou usa a do sistema por defeito)
   useEffect(() => {
-    const listener = Appearance.addChangeListener(({ colorScheme }) => {
-      setDarkMode(colorScheme === 'dark');
-    });
+    const loadTheme = async () => {
+      const saved = await AsyncStorage.getItem('darkMode');
+      if (saved !== null) {
+        setDarkMode(saved === 'true');
+      } else {
+        const system = Appearance.getColorScheme();
+        setDarkMode(system === 'dark');
+      }
+    };
 
-    return () => listener.remove();
+    loadTheme();
   }, []);
+
+  // Atualiza e salva a preferência
+  const toggleTheme = async () => {
+    const newValue = !darkMode;
+    setDarkMode(newValue);
+    await AsyncStorage.setItem('darkMode', newValue.toString());
+  };
 
   return (
     <ThemeContext.Provider value={{ darkMode, toggleTheme }}>

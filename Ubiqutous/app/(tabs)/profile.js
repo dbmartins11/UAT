@@ -14,13 +14,17 @@ import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase/firebaseConf';
 import { doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
+import { useTheme } from '../../components/ThemeContext';
+import { getCurrentLanguage, translate } from '../../utils/languageUtils';
+
 
 export default function ProfileScreen() {
   const router = useRouter();
-
+  const { darkMode } = useTheme();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [aboutMe, setAboutMe] = useState('');
+  const [language, setLanguage] = useState('en');
 
   useFocusEffect(
     useCallback(() => {
@@ -28,6 +32,9 @@ export default function ProfileScreen() {
         try {
           const user = auth.currentUser;
           if (!user) return;
+
+          const lang = await getCurrentLanguage();
+          setLanguage(lang);
 
           const docRef = doc(db, 'users', user.uid);
           const docSnap = await getDoc(docRef);
@@ -37,8 +44,6 @@ export default function ProfileScreen() {
             setUsername(data.username || 'Unnamed');
             setEmail(data.email || user.email);
             setAboutMe(data.aboutMe || '');
-          } else {
-            console.log('No such document!');
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -74,63 +79,69 @@ export default function ProfileScreen() {
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
-      style={styles.background}
+      style={[styles.background, darkMode && { backgroundColor: '#111' }]}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        {/* Avatar com inicial */}
-        <View style={styles.avatar}>
+        <View style={[styles.avatar, darkMode && { backgroundColor: '#444' }]}>
           <Text style={styles.avatarText}>{firstLetter}</Text>
         </View>
 
-        <Text style={styles.username}>{username}</Text>
-        <Text style={styles.about}>{aboutMe}</Text>
+        <Text style={[styles.username, darkMode && { color: '#fff' }]}>{username}</Text>
+        <Text style={[styles.about, darkMode && { color: '#ccc' }]}>{aboutMe}</Text>
 
         <View style={styles.statsRow}>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>5</Text>
-            <Text style={styles.statLabel}>visited{'\n'}countries</Text>
+          <View style={[styles.statBox, darkMode && { backgroundColor: '#333' }]}>
+            <Text style={[styles.statNumber, darkMode && { color: '#fff' }]}>5</Text>
+            <Text style={[styles.statLabel, darkMode && { color: '#ccc' }]}>{translate('visited_countries', language)}</Text>
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>12</Text>
-            <Text style={styles.statLabel}>wished{'\n'}countries</Text>
+          <View style={[styles.statBox, darkMode && { backgroundColor: '#333' }]}>
+            <Text style={[styles.statNumber, darkMode && { color: '#fff' }]}>12</Text>
+            <Text style={[styles.statLabel, darkMode && { color: '#ccc' }]}>{translate('wished_countries', language)}</Text>
           </View>
-          <View style={styles.statBox}>
-            <Text style={styles.statNumber}>5</Text>
-            <Text style={styles.statLabel}>my{'\n'}lists</Text>
+          <View style={[styles.statBox, darkMode && { backgroundColor: '#333' }]}>
+            <Text style={[styles.statNumber, darkMode && { color: '#fff' }]}>5</Text>
+            <Text style={[styles.statLabel, darkMode && { color: '#ccc' }]}>{translate('my_lists', language)}</Text>
           </View>
         </View>
 
-        <Text style={styles.sectionTitle}>Visited Countries</Text>
+        <Text style={[styles.sectionTitle, darkMode && { color: '#fff' }]}>
+          {translate('visited_countries_section', language)}
+        </Text>
+
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countriesScroll}>
           {visitedCountries.map((country, index) => (
             <View key={index} style={styles.countryCard}>
               <Image source={country.image} style={styles.countryImage} />
-              <Text style={styles.countryLabel}>{country.flag} {country.name}</Text>
+              <Text style={[styles.countryLabel, darkMode && { color: '#fff' }]}>
+                {country.flag} {country.name}
+              </Text>
             </View>
           ))}
         </ScrollView>
 
         {myLists.map((item, index) => (
-          <View key={index} style={styles.listCard}>
+          <View key={index} style={[styles.listCard, darkMode && { backgroundColor: '#333' }]}>
             <View>
-              <Text style={styles.listTitle}>{item.title}</Text>
-              <Text style={styles.listDescription}>{item.description}</Text>
+              <Text style={[styles.listTitle, darkMode && { color: '#fff' }]}>{item.title}</Text>
+              <Text style={[styles.listDescription, darkMode && { color: '#ccc' }]}>{item.description}</Text>
             </View>
             <Image source={item.image} style={styles.listImage} />
           </View>
         ))}
 
         <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile')}>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
+          <Text style={styles.editButtonText}>{translate('edit_profile', language)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
+          <Text style={styles.logoutButtonText}>{translate('logout', language)}</Text>
         </TouchableOpacity>
       </ScrollView>
-    </ImageBackground> 
+    </ImageBackground>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   background: {
