@@ -65,22 +65,34 @@ export default function SettingsPage() {
     setLanguage(lang);
   };
 
-  return (
-    <View style={[styles.container, { backgroundColor: darkMode ? '#111' : '#fff' }]}>
-      <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{t.title}</Text>
+  const backgroundColor = darkMode ? '#000' : '#fff';
+  const textColor = darkMode ? '#fff' : '#000';
+  const subtitleColor = darkMode ? '#aaa' : '#333';
 
-      <View style={styles.settingRow}>
-        <Ionicons name="moon" size={20} color={darkMode ? '#fff' : '#000'} />
-        <Text style={[styles.label, { color: darkMode ? '#fff' : '#000' }]}>{t.darkMode}</Text>
+  return (
+    <View style={[styles.container, { backgroundColor }]}>
+      <Text style={[styles.title, { color: textColor }]}>{t.title}</Text>
+
+      <View style={[styles.settingRow, { borderBottomColor: darkMode ? '#333' : '#ccc', borderBottomWidth: 1, paddingBottom: 10 }]}>
+        <Ionicons name="moon" size={20} color={textColor} />
+        <Text style={[styles.label, { color: textColor }]}>{t.darkMode}</Text>
         <Switch value={darkMode} onValueChange={toggleTheme} />
       </View>
 
-      <Text style={[styles.subTitle, { color: darkMode ? '#ccc' : '#333' }]}>{t.language}</Text>
+      <Text style={[styles.subTitle, { color: subtitleColor }]}>{t.language}</Text>
 
       {['en', 'pt', 'sl'].map((lang) => (
-        <TouchableOpacity key={lang} onPress={() => changeLanguage(lang)} style={styles.langButton}>
+        <TouchableOpacity
+          key={lang}
+          onPress={() => changeLanguage(lang)}
+          style={[styles.langButton, {
+            backgroundColor: language === lang ? '#2894B0' : 'transparent',
+            borderRadius: 6,
+            paddingHorizontal: 12
+          }]}
+        >
           <Text style={{
-            color: language === lang ? '#2894B0' : darkMode ? '#fff' : '#000',
+            color: language === lang ? '#fff' : textColor,
             fontWeight: language === lang ? 'bold' : 'normal'
           }}>
             {languageLabels[lang]}
@@ -121,5 +133,6 @@ const styles = StyleSheet.create({
   },
   langButton: {
     paddingVertical: 10,
+    marginBottom: 8,
   },
 });

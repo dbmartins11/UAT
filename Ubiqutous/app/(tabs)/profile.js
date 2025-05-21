@@ -23,6 +23,11 @@ import { getCurrentLanguage, translate } from '../../utils/languageUtils';
 export default function ProfileScreen() {
   const router = useRouter();
   const { darkMode } = useTheme();
+  const backgroundColor = darkMode ? '#000' : '#fff';
+  const cardColor = darkMode ? '#1a1a1a' : '#dbe7fb';
+  const textColor = darkMode ? '#fff' : '#000';
+  const subtitleColor = darkMode ? '#ccc' : '#555';
+
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [aboutMe, setAboutMe] = useState('');
@@ -88,65 +93,67 @@ export default function ProfileScreen() {
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
-      style={[styles.background, darkMode && { backgroundColor: '#111' }]}
+      style={[styles.background, { backgroundColor }]}
     >
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={[styles.avatar, darkMode && { backgroundColor: '#444' }]}>
-          <Text style={styles.avatarText}>{firstLetter}</Text>
+
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={[styles.avatar, { backgroundColor: darkMode ? '#333' : '#3A5BA0' }]}>
+        <Text style={[styles.avatarText]}>{firstLetter}</Text>
+      </View>
+
+      <Text style={[styles.username, { color: textColor }]}>{username}</Text>
+      <Text style={[styles.about, { color: subtitleColor }]}>{aboutMe}</Text>
+
+      <View style={styles.statsRow}>
+        <View style={[styles.statBox, { backgroundColor: cardColor }]}>
+          <Text style={[styles.statNumber, { color: textColor }]}>5</Text>
+          <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('visited_countries', language)}</Text>
         </View>
-
-        <Text style={[styles.username, darkMode && { color: '#fff' }]}>{username}</Text>
-        <Text style={[styles.about, darkMode && { color: '#ccc' }]}>{aboutMe}</Text>
-
-        <View style={styles.statsRow}>
-          <View style={[styles.statBox, darkMode && { backgroundColor: '#333' }]}>
-            <Text style={[styles.statNumber, darkMode && { color: '#fff' }]}>5</Text>
-            <Text style={[styles.statLabel, darkMode && { color: '#ccc' }]}>{translate('visited_countries', language)}</Text>
-          </View>
-          <View style={[styles.statBox, darkMode && { backgroundColor: '#333' }]}>
-            <Text style={[styles.statNumber, darkMode && { color: '#fff' }]}>12</Text>
-            <Text style={[styles.statLabel, darkMode && { color: '#ccc' }]}>{translate('wished_countries', language)}</Text>
-          </View>
-          <View style={[styles.statBox, darkMode && { backgroundColor: '#333' }]}>
-            <Text style={[styles.statNumber, darkMode && { color: '#fff' }]}>5</Text>
-            <Text style={[styles.statLabel, darkMode && { color: '#ccc' }]}>{translate('my_lists', language)}</Text>
-          </View>
+        <View style={[styles.statBox, { backgroundColor: cardColor }]}>
+          <Text style={[styles.statNumber, { color: textColor }]}>12</Text>
+          <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('wished_countries', language)}</Text>
         </View>
+        <View style={[styles.statBox, { backgroundColor: cardColor }]}>
+          <Text style={[styles.statNumber, { color: textColor }]}>5</Text>
+          <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('my_lists', language)}</Text>
+        </View>
+      </View>
 
-        <Text style={[styles.sectionTitle, darkMode && { color: '#fff' }]}>
-          {translate('visited_countries_section', language)}
-        </Text>
+      <Text style={[styles.sectionTitle, { color: textColor }]}>
+        {translate('visited_countries_section', language)}
+      </Text>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countriesScroll}>
-          {visitedCountries.map((country, index) => (
-            <View key={index} style={styles.countryCard}>
-              <Image source={country.image} style={styles.countryImage} />
-              <Text style={[styles.countryLabel, darkMode && { color: '#fff' }]}>
-                {country.flag} {country.name}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
-
-        {myLists.map((item, index) => (
-          <View key={index} style={[styles.listCard, darkMode && { backgroundColor: '#333' }]}>
-            <View>
-              <Text style={[styles.listTitle, darkMode && { color: '#fff' }]}>{item.title}</Text>
-              <Text style={[styles.listDescription, darkMode && { color: '#ccc' }]}>{item.description}</Text>
-            </View>
-            <Image source={item.image} style={styles.listImage} />
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countriesScroll}>
+        {visitedCountries.map((country, index) => (
+          <View key={index} style={styles.countryCard}>
+            <Image source={country.image} style={styles.countryImage} />
+            <Text style={[styles.countryLabel, { color: textColor }]}>
+              {country.flag} {country.name}
+            </Text>
           </View>
         ))}
-
-        <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile')}>
-          <Text style={styles.editButtonText}>{translate('edit_profile', language)}</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutButtonText}>{translate('logout', language)}</Text>
-        </TouchableOpacity>
       </ScrollView>
-    </ImageBackground>
+
+      {myLists.map((item, index) => (
+        <View key={index} style={[styles.listCard, { backgroundColor: cardColor }]}>
+          <View>
+            <Text style={[styles.listTitle, { color: textColor }]}>{item.title}</Text>
+            <Text style={[styles.listDescription, { color: subtitleColor }]}>{item.description}</Text>
+          </View>
+          <Image source={item.image} style={styles.listImage} />
+        </View>
+      ))}
+
+      <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editprofile')}>
+        <Text style={styles.editButtonText}>{translate('edit_profile', language)}</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>{translate('logout', language)}</Text>
+      </TouchableOpacity>
+    </ScrollView>
+  </ImageBackground>
+
   );
 }
 
