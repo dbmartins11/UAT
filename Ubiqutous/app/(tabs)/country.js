@@ -7,7 +7,7 @@ import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchCities, fetchImages, fetchImagesUnsplash } from '../../api/api.js';
 import { useNavigation } from 'expo-router';
-
+import BackButton from '../../components/backButton.js';
 
 export default function Country() {
     const navigation = useNavigation();
@@ -72,6 +72,7 @@ export default function Country() {
 
     return (
         <View style={{ flex: 1, padding: 10 }}>
+            <BackButton></BackButton>
             <View style={styles.imgBlock}>
                 {urls[images[0]] && (
                     <Image
