@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchCities, fetchImages, fetchImagesUnsplash } from '../../api/api.js';
+import { useNavigation } from 'expo-router';
 
 
 export default function Country() {
+    const navigation = useNavigation();
     const route = useRoute();
     const { country, urls } = route.params;
 
@@ -23,7 +25,6 @@ export default function Country() {
 
     useEffect(() => {
         const getCountryImages = () => {
-            console.log("1")
             const indImgs = [];
             while (indImgs.length < 4) {
                 const randomIndex = Math.floor(Math.random() * urls.length);
@@ -32,16 +33,13 @@ export default function Country() {
                     indImgs.push(randomIndex);
                 }
             }
-            console.log("IMGS: " + indImgs[0] + ", " + indImgs[1] + ", " + indImgs[2] + ", " + indImgs[3]);
             setImages(indImgs);
         };
 
         const fetchData = async (country) => {
-            console.log("2")
             let dataNames = [];
             try {
                 dataNames = await fetchCities(country + "+all");
-                console.log("CITIES: " + dataNames);
                 setCities(dataNames);
                 console.log("3")
             } catch (error) {
@@ -56,12 +54,10 @@ export default function Country() {
                         urls.push(data);
                     }
                 }
-                console.log("CITIES IMGS: " + urls.length);
-                console.log("CITIES IMGS: " + urls[0].length);
                 setCitiesImg(urls);
                 console.log("5")
             } catch (error) {
-                console.error('Error fetching the cities\' images:', error);
+                console.error('Error fetching the images:', error);
             }
         }
 
@@ -72,9 +68,7 @@ export default function Country() {
             getCountryImages();
         }
 
-        console.log("7")
-
-    }, [])
+    }, [urls])
 
     if (!fontsLoaded) {
         return <AppLoading />;
@@ -126,7 +120,13 @@ export default function Country() {
             >
                 {citiesImg.length > 0 ? (
                     cities.map((city, index) => (
-                        <View key={index} style={styles.cities}>
+                        <TouchableOpacity
+                            key={index}
+                            style={styles.cities}
+                            onPress={() => navigation.navigate('country', {
+                                        country: city,
+                                        urls: cities[index],
+                                    })}>
                             <View style={{ width: '30%', justifyContent: 'center' }}>
                                 <Text style={{
                                     fontFamily: 'OpenSans_400Regular',
@@ -151,7 +151,7 @@ export default function Country() {
                                     style={styles.cityImg}>
                                 </Image>
                             </View>
-                        </View>
+                        </TouchableOpacity>
                     ))
                 ) : (
                     <Text style={styles.title}>Loading...</Text>

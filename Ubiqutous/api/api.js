@@ -14,12 +14,9 @@ export const fetchCities = async (country) => {
         console.log('URL: ' + url);
         //const response = await fetch(`https://serpapi.com/search.json?engine=google&q=Cities+in+${country}&api_key=${serpapiKey}`);
         const data = await response.json();
-        const table = data.related_questions.find(q =>
-            q.list !== undefined
-        ).list;
-        console.log("adasdasdasdasd: " + table);
-
-        table.forEach(element => {
+        const dataFiltered = data.answer_box?.expanded_list || [];
+        const titles = dataFiltered.map(item => item.title);
+        titles.forEach(element => {
             let city = element.replace('.', '');
             if(city !== "City"){
                 cities.push(city);

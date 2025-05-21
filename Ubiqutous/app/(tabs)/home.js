@@ -17,8 +17,8 @@ export default function Home() {
     const [urls, setUrls] = useState([]);
     const popularTouristCountries = [
         "Portugal",
-        //"France",
-        // "Spain", "USA", 
+        "France",
+        "Spain", "USA", 
         // "China", "Italy", "Turkey",
         // "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
     ];
