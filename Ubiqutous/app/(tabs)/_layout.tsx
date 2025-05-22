@@ -6,6 +6,8 @@ import { ThemeProvider } from '../../components/ThemeContext'; // Garante que o 
 
 
 
+
+
 export default function TabLayout() {
   return (
     <ThemeProvider>

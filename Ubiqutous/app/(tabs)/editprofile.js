@@ -46,16 +46,36 @@ export default function EditProfileScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      return () => {
-        setUsername(originalData.username);
-        setEmail(originalData.email);
-        setAboutMe(originalData.aboutMe);
+      const loadData = async () => {
+        const lang = await getCurrentLanguage();
+        setLanguage(lang);
+
+        const user = auth.currentUser;
+        if (!user) return;
+        await user.reload();
+        const updatedUser = auth.currentUser;
+        const docSnap = await getDoc(doc(db, 'users', updatedUser.uid));
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          const current = {
+            username: data.username || '',
+            email: data.email || updatedUser.email,
+            aboutMe: data.aboutMe || '',
+          };
+          setUsername(current.username);
+          setEmail(current.email);
+          setAboutMe(current.aboutMe);
+          setOriginalData(current);
+        }
+
         setCurrentPassword('');
         setNewPassword('');
         setShowPassword(false);
         setShowCurrentPassword(false);
       };
-    }, [originalData])
+
+      loadData();
+    }, [])
   );
 
   useEffect(() => {
@@ -152,6 +172,7 @@ export default function EditProfileScreen() {
     <ImageBackground
       source={require('../../assets/images/background.png')}
       style={[styles.background, { backgroundColor }]}
+      imageStyle={{ opacity: darkMode ? 0.2 : 1 }}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -230,7 +251,13 @@ export default function EditProfileScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <TouchableOpacity
+          style={[
+            styles.saveButton,
+            darkMode && styles.buttonDark,
+          ]}
+          onPress={handleSave}
+        >
           <Text style={styles.saveButtonText}>{translate('save_changes', language)}</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -284,5 +311,10 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     fontSize: 16,
+  },
+  buttonDark: {
+    backgroundColor: '#222',
+    borderWidth: 1,
+    borderColor: '#444',
   },
 });

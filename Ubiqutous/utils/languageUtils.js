@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const translations = {
   en: {
     edit_profile: 'Edit Profile',
+    logout: 'Logout',
     new_username: 'New username',
     new_email: 'New email',
     about_me: 'About me...',
@@ -24,6 +25,7 @@ const translations = {
   },
   pt: {
     edit_profile: 'Editar Perfil',
+    logout: 'Terminar Sessão',
     new_username: 'Novo nome de utilizador',
     new_email: 'Novo email',
     about_me: 'Sobre mim...',
@@ -44,6 +46,7 @@ const translations = {
   },
   sl: {
     edit_profile: 'Uredi profil',
+    logout: 'Odjava',
     new_username: 'Novo uporabniško ime',
     new_email: 'Nov e-poštni naslov',
     about_me: 'O meni...',
