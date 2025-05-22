@@ -9,14 +9,14 @@ import { fetchMonuments, fetchImagesUnsplash } from '../../api/api.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 
-export default function Country() {
+export default function City() {
     const navigation = useNavigation();
     const route = useRoute();
     const { city, urls } = route.params;
 
     const [images, setImages] = useState([]);
-    const [cities, setCities] = useState([]);
-    const [citiesImg, setCitiesImg] = useState([]);
+    const [monuments, setMonuments] = useState([]);
+    const [monumentsImg, setMonumentsImg] = useState([]);
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
         OpenSans_400Regular,
@@ -39,19 +39,18 @@ export default function Country() {
             let dataNames = [];
             try {
                 dataNames = await fetchMonuments(`${city}`);
-                setCities(dataNames);
+                setMonuments(dataNames);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
             try {
-                let urls = [];
-                for (const city of dataNames) {
-                    {
-                        const data = await fetchImagesUnsplash(city);
-                        urls.push(data);
-                    }
-                }
-                setCitiesImg(urls);
+                const urls = await Promise.all(
+                    dataNames.map(async (monument) => {
+                        const data = await fetchImagesUnsplash(monument);
+                        return data;
+                    })
+                );
+                setMonumentsImg(urls);
             } catch (error) {
                 console.error('Error fetching the images:', error);
             }
@@ -71,7 +70,7 @@ export default function Country() {
 
     return (
         <View style={{ flex: 1, padding: 10 }}>
-            <BackButton />  
+            <BackButton />
             <View style={styles.imgBlock}>
                 {urls[images[0]] && (
                     <Image
@@ -114,16 +113,16 @@ export default function Country() {
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={styles.scrollContainer}
             >
-                {citiesImg.length > 0 ? (
-                    cities.map((city, index) => (
+                {monumentsImg.length > 0 ? (
+                    monuments.map((monument, index) => (
                         <TouchableOpacity
                             key={index}
-                            style={styles.cities}
-                            // onPress={() => navigation.navigate('country', {
-                            //             country: city,
-                            //             urls: cities[index],
-                            //         })}
-                            >
+                            style={styles.monuments}
+                            onPress={() => navigation.navigate('monument', {
+                                monument: monument,
+                                url: monumentsImg[index],
+                            })}
+                        >
                             <View style={{ width: '30%', justifyContent: 'center' }}>
                                 <Text style={{
                                     fontFamily: 'OpenSans_400Regular',
@@ -131,20 +130,20 @@ export default function Country() {
                                     fontWeight: 'bold',
                                     textTransform: 'uppercase',
                                 }}>
-                                    {city}
+                                    {monument}
                                 </Text>
                             </View>
                             <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
                                 <Image
-                                    source={{ uri: citiesImg[index][0] }}
+                                    source={{ uri: monumentsImg[index][0] }}
                                     style={styles.cityImg}>
                                 </Image>
                                 <Image
-                                    source={{ uri: citiesImg[index][1] }}
+                                    source={{ uri: monumentsImg[index][1] }}
                                     style={styles.cityImg}>
                                 </Image>
                                 <Image
-                                    source={{ uri: citiesImg[index][2] }}
+                                    source={{ uri: monumentsImg[index][2] }}
                                     style={styles.cityImg}>
                                 </Image>
                             </View>
@@ -204,7 +203,7 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         borderRadius: 5,
     },
-    cities: {
+    monuments: {
         width: '100%',
         height: 120,
         padding: '2%',
