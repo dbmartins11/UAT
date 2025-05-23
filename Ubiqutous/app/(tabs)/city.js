@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
-import {fetchMonuments} from '../../api/serpApi.js';
-import {fetchImagesUnsplash} from '../../api/apiUnsplash.js';
+import { fetchMonuments } from '../../api/serpApi.js';
+import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 
@@ -16,6 +16,7 @@ export default function City() {
     const { city, urls } = route.params;
 
     const [images, setImages] = useState([]);
+    const [imagesReady, setImagesReady] = useState(false);
     const [monuments, setMonuments] = useState([]);
     const [monumentsImg, setMonumentsImg] = useState([]);
     const [fontsLoaded] = useFonts({
@@ -25,6 +26,11 @@ export default function City() {
     });
 
     useEffect(() => {
+        setImagesReady(false);
+        setMonumentsImg([]);
+        setMonuments([]);
+        setImages([]);
+
         const getCountryImages = () => {
             const indImgs = [];
             while (indImgs.length < 4) {
@@ -58,10 +64,19 @@ export default function City() {
         }
 
         fetchData(city);
+        getCountryImages();
 
-        if (urls || urls.length !== 0) {
-            getCountryImages();
+        const preloadImages = async (urls) => {
+            const cacheImages = urls.map((url) => Image.prefetch(url));
+            await Promise.all(cacheImages);
         }
+
+        const LoadImages = async () => {
+            await preloadImages(urls);
+            setImagesReady(true);
+        }
+
+        LoadImages();
 
     }, [urls])
 
@@ -71,90 +86,104 @@ export default function City() {
 
     return (
         <View style={{ flex: 1, padding: 10 }}>
-            <BackButton />
-            <View style={styles.imgBlock}>
-                {urls[images[0]] && (
-                    <Image
-                        source={{ uri: urls[images[0]] }}
-                        style={styles.firstImg}
-                    />
-                )}
-
-                <View style={styles.imgBlock_1}>
-                    {urls[images[1]] && (
-                        <Image
-                            source={{ uri: urls[images[1]] }}
-                            style={styles.secondImg}
-                        />
-                    )}
-
-                    <View style={styles.imgBlock_2}>
-                        {urls[images[2]] && (
+            {imagesReady ? (
+                <View>
+                    <BackButton />
+                    <View style={styles.imgBlock}>
+                        {urls[images[0]] && (
                             <Image
-                                source={{ uri: urls[images[2]] }}
-                                style={styles.thirdImg}
+                                source={{ uri: urls[images[0]] }}
+                                style={styles.firstImg}
                             />
                         )}
-                        {urls[images[3]] && (
-                            <Image
-                                source={{ uri: urls[images[3]] }}
-                                style={styles.thirdImg}
-                            />
-                        )}
+
+                        <View style={styles.imgBlock_1}>
+                            {urls[images[1]] && (
+                                <Image
+                                    source={{ uri: urls[images[1]] }}
+                                    style={styles.secondImg}
+                                />
+                            )}
+
+                            <View style={styles.imgBlock_2}>
+                                {urls[images[2]] && (
+                                    <Image
+                                        source={{ uri: urls[images[2]] }}
+                                        style={styles.thirdImg}
+                                    />
+                                )}
+                                {urls[images[3]] && (
+                                    <Image
+                                        source={{ uri: urls[images[3]] }}
+                                        style={styles.thirdImg}
+                                    />
+                                )}
+                            </View>
+                        </View>
                     </View>
+                    {city ?
+                        <Text style={styles.title}>{city}</Text>
+                        :
+                        <Text style={styles.title}>Undefined</Text>
+                    }
+                    <ScrollView
+                        horizontal={false}
+                        showsVerticalScrollIndicator={true}
+                        contentContainerStyle={styles.scrollContainer}
+                    >
+                        {monumentsImg.length > 0 ? (
+                            monuments.map((monument, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    style={styles.monuments}
+                                    onPress={() => navigation.navigate('monument', {
+                                        monument: monument,
+                                        city: city,
+                                        url: monumentsImg[index],
+                                    })}
+                                >
+                                    <View style={{ width: '30%', justifyContent: 'center' }}>
+                                        <Text style={{
+                                            fontFamily: 'OpenSans_400Regular',
+                                            fontSize: 17,
+                                            fontWeight: 'bold',
+                                            textTransform: 'uppercase',
+                                        }}>
+                                            {monument}
+                                        </Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
+                                        <Image
+                                            source={{ uri: monumentsImg[index][0] }}
+                                            style={styles.cityImg}>
+                                        </Image>
+                                        <Image
+                                            source={{ uri: monumentsImg[index][1] }}
+                                            style={styles.cityImg}>
+                                        </Image>
+                                        <Image
+                                            source={{ uri: monumentsImg[index][2] }}
+                                            style={styles.cityImg}>
+                                        </Image>
+                                    </View>
+                                </TouchableOpacity>
+                            ))
+                        ) : (
+                            <Text style={styles.title}>Loading...</Text>
+                        )}
+                    </ScrollView>
                 </View>
-            </View>
-            {city ?
-                <Text style={styles.title}>{city}</Text>
-                :
-                <Text style={styles.title}>Undefined</Text>
+            ) :
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
+                        Loading
+                    </Text>
+                    <ActivityIndicator
+                        size="large"
+                        color="#A0B5DB"
+                    />
+                </View>
             }
-            <ScrollView
-                horizontal={false}
-                showsVerticalScrollIndicator={true}
-                contentContainerStyle={styles.scrollContainer}
-            >
-                {monumentsImg.length > 0 ? (
-                    monuments.map((monument, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={styles.monuments}
-                            onPress={() => navigation.navigate('monument', {
-                                monument: monument,
-                                city: city,
-                                url: monumentsImg[index],
-                            })}
-                        >
-                            <View style={{ width: '30%', justifyContent: 'center' }}>
-                                <Text style={{
-                                    fontFamily: 'OpenSans_400Regular',
-                                    fontSize: 17,
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase',
-                                }}>
-                                    {monument}
-                                </Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
-                                <Image
-                                    source={{ uri: monumentsImg[index][0] }}
-                                    style={styles.cityImg}>
-                                </Image>
-                                <Image
-                                    source={{ uri: monumentsImg[index][1] }}
-                                    style={styles.cityImg}>
-                                </Image>
-                                <Image
-                                    source={{ uri: monumentsImg[index][2] }}
-                                    style={styles.cityImg}>
-                                </Image>
-                            </View>
-                        </TouchableOpacity>
-                    ))
-                ) : (
-                    <Text style={styles.title}>Loading...</Text>
-                )}
-            </ScrollView>
         </View>
     );
 }
@@ -168,7 +197,7 @@ const styles = StyleSheet.create({
     },
     imgBlock: {
         width: '100%',
-        height: '40%',
+        height: '30%',
         display: 'flex',
         flexDirection: 'row',
         gap: '2%'

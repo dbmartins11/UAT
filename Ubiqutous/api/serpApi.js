@@ -2,7 +2,8 @@
 //import SerpApi from 'google-search-results-nodejs';
 
 //const serpapiKey = "9a0b8b66a8c2ff39a093921cc324852293c5e052eed48a7e65be066e3db34a3d";
-const serpapiKey = "19c034da5f127caa07dd49deb7265b97507d0617364b68ee20b53ce350967e2a";
+//const serpapiKey = "19c034da5f127caa07dd49deb7265b97507d0617364b68ee20b53ce350967e2a";
+const serpapiKey = "753aa196b9ddd121b643984c91ba8b2aa95b0488ef6fd9c37b620ab93fc2fe5a";
 
 export const fetchCities = async (country) => {
     const cities = [];
