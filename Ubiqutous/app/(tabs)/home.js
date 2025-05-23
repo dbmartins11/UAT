@@ -5,7 +5,7 @@ import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import AppLoading from 'expo-app-loading';
 import { useNavigation, Link } from 'expo-router';
 import SearchBar from '../../components/SearchBar';
-import { fetchImages, fetchImagesUnsplash } from '../../api/api.js';
+import {fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { PermissionsAndroid, Platform } from 'react-native';
 
 export default function Home() {

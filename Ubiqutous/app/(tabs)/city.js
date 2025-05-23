@@ -5,7 +5,8 @@ import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
-import { fetchMonuments, fetchImagesUnsplash } from '../../api/api.js';
+import {fetchMonuments} from '../../api/serpApi.js';
+import {fetchImagesUnsplash} from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 
