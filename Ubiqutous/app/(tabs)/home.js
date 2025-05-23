@@ -5,7 +5,7 @@ import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import AppLoading from 'expo-app-loading';
 import { useNavigation, Link } from 'expo-router';
 import SearchBar from '../../components/SearchBar';
-import {fetchImagesUnsplash } from '../../api/apiUnsplash.js';
+import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { PermissionsAndroid, Platform } from 'react-native';
 
 export default function Home() {
@@ -38,19 +38,19 @@ export default function Home() {
 
         const fetchData = async () => {
             try {
-                const urls = [];
-                for (const country of popularTouristCountries) {
-                    //const data = await fetchImages(country);
-                    const data = await fetchImagesUnsplash(country + " landmarks and tourism");
-                    urls.push(data);
-                }
+                const urls = await Promise.all(
+                    popularTouristCountries.map(async (country) => {
+                        const data = await fetchImagesUnsplash(country + " landmarks and tourism");
+                        return data;
+                    })
+                );                
                 setUrls(urls);
             }
             catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
-        
+
         fetchData();
         //requestLocationPermission();
 
