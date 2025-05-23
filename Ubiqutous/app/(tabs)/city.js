@@ -120,6 +120,7 @@ export default function City() {
                             style={styles.monuments}
                             onPress={() => navigation.navigate('monument', {
                                 monument: monument,
+                                city: city,
                                 url: monumentsImg[index],
                             })}
                         >

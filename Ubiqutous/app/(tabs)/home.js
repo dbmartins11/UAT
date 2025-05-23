@@ -52,7 +52,7 @@ export default function Home() {
         };
         
         fetchData();
-        requestLocationPermission();
+        //requestLocationPermission();
 
     }, [])
 
