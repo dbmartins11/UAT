@@ -64,9 +64,6 @@ export default function Country() {
             }
         }
 
-        fetchData(country);
-        getCountryImages();
-
         const preloadImages = async (urls) => {
             const cacheImages = urls.map((url) => Image.prefetch(url));
             await Promise.all(cacheImages);
@@ -78,6 +75,8 @@ export default function Country() {
             setImagesReady(true);
         }
 
+        fetchData(country);
+        getCountryImages();
         LoadImages();
 
     }, [urls])
@@ -254,7 +253,7 @@ const styles = StyleSheet.create({
 
     scrollContainer: {
         flexGrow: 1,
-        paddingBottom: 20,
+        paddingBottom: '20%',
     },
 
 });
