@@ -13,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase/firebaseConf';
 import { useFocusEffect } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -34,6 +35,8 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      await AsyncStorage.setItem('userID', auth.currentUser.uid);
+      console.log('User ID saved:', auth.currentUser.uid);
       router.replace('/(tabs)/home');
     } catch (error) {
       alert('Login failed: ' + error.message);
