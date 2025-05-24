@@ -94,6 +94,30 @@ export default function Monument() {
                     <BackButton style={styles.backButtonOverlay} />
                 </ImageBackground>
             </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                {monument ?
+                    <Text style={styles.title}>{monument}</Text>
+                    :
+                    <Text style={styles.title}>Undefined</Text>
+                }
+                <TouchableOpacity
+                    style={{
+                        marginLeft: 30,
+                        backgroundColor: '#A0B5DB',
+                        borderRadius: 25,
+                        padding: 10,
+                    }}
+                    onPress={() => {
+                        save();
+                    }}
+                >
+                    <Image
+                        source={require('./../../assets/icons/save.png')}
+                        style={{ width: 20, height: 20 }}
+                        resizeMode="contain"
+                    />
+                </TouchableOpacity>
+            </View>
             <Text style={styles.description}>
                 {description}
             </Text>
@@ -145,6 +169,13 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
 
+    title: {
+        marginVertical: '5%',
+        textAlign: 'center',
+        fontSize: 30,
+        fontFamily: 'CrimsonText_400Regular',
+    },
+    
     mainImg: {
         height: '100%',
         justifyContent: 'flex-start',

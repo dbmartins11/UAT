@@ -120,12 +120,31 @@ export default function City() {
                                 )}
                             </View>
                         </View>
+                    </View>            
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
+                        {city ?
+                            <Text style={styles.title}>{city}</Text>
+                            :
+                            <Text style={styles.title}>Undefined</Text>
+                        }
+                        <TouchableOpacity
+                            style={{
+                                marginLeft: 30,
+                                backgroundColor: '#A0B5DB',
+                                borderRadius: 25,
+                                padding: 10,
+                            }}
+                            onPress={() => {
+                                save();
+                            }}
+                        >
+                            <Image
+                                source={require('./../../assets/icons/save.png')}
+                                style={{ width: 20, height: 20 }}
+                                resizeMode="contain"
+                            />
+                        </TouchableOpacity>
                     </View>
-                    {city ?
-                        <Text style={styles.title}>{city}</Text>
-                        :
-                        <Text style={styles.title}>Undefined</Text>
-                    }
                     <ScrollView
                         horizontal={false}
                         showsVerticalScrollIndicator={true}
