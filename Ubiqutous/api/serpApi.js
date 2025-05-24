@@ -17,7 +17,7 @@ export const fetchCities = async (country) => {
         const titles = dataFiltered.map(item => item.title);
         titles.forEach(element => {
             let city = element.replace('.', '');
-            if(city !== "City"){
+            if (city !== "City") {
                 cities.push(city);
             }
         });
@@ -32,12 +32,26 @@ export const fetchCities = async (country) => {
 export const fetchMonuments = async (city) => {
     //const monuments = [];
     try {
-        const response = await fetch(`https://serpapi.com/search.json?engine=google&q=Principais+monumentos+em+${city}&api_key=${serpapiKey}`);
+        const url = `https://serpapi.com/search.json?engine=google&q=Monuments+in+${city}&api_key=${serpapiKey}`;
+        const response = await fetch(url);
         const data = await response.json();
-        const monuments = data.top_sights.sights
-        .filter(q => q.title !== undefined)
-        .map(q => q.title);
-        console.log("API MONUMENTS: " + monuments );
+        console.log('URL: ' + url);
+
+        let monuments = [];
+        const listBlock = data.ai_overview?.text_blocks?.find(block => block.type === "list");
+
+        if (listBlock) {
+            monuments = listBlock?.list?.map(item => item.title.replace(':', ''));
+        }
+        console.log("Monuments: " + monuments);
+
+        if (monuments.length === 0) {
+            const list = data.answer_box?.expanded_list
+            if (list) {
+                monuments = list.map(item => item.title.replace(':', ''));
+            }
+        }
+
         return monuments;
     }
     catch (error) {
@@ -56,12 +70,12 @@ export const fetchImages = async (query) => {
         console.log("API IMAGES: " + data);
 
         const links = data.images_results
-        .filter(q =>q.thumbnail !== undefined)
-        .map(q => q.thumbnail);
-        
+            .filter(q => q.thumbnail !== undefined)
+            .map(q => q.thumbnail);
+
         //console.log("adasdasdasdasd: " + links);
         //const link = links[0];
-        
+
         return links;
     }
     catch (error) {

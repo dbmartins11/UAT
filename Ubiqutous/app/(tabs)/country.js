@@ -15,6 +15,7 @@ export default function Country() {
     const route = useRoute();
     const { country, urls } = route.params;
 
+    const [getNames, setGetNames] = useState(false);
     const [images, setImages] = useState([]);
     const [imagesReady, setImagesReady] = useState(false);
     const [cities, setCities] = useState([]);
@@ -27,6 +28,7 @@ export default function Country() {
 
     useEffect(() => {
         setImagesReady(false);
+        setGetNames(false);
         setCitiesImg([]);
         setCities([]);
         setImages([]);
@@ -48,6 +50,7 @@ export default function Country() {
             try {
                 dataNames = await fetchCities(country + "+all");
                 setCities(dataNames);
+                setGetNames(true);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
@@ -64,6 +67,13 @@ export default function Country() {
             }
         }
 
+        fetchData(country);
+        getCountryImages();
+        
+    }, [urls]);
+
+
+    useEffect(() => {
         const preloadImages = async (urls) => {
             const cacheImages = urls.map((url) => Image.prefetch(url));
             await Promise.all(cacheImages);
@@ -75,11 +85,11 @@ export default function Country() {
             setImagesReady(true);
         }
 
-        fetchData(country);
-        getCountryImages();
-        LoadImages();
+        if (getNames) {
+            LoadImages();
+        }
 
-    }, [urls])
+    }, [getNames]);
 
     if (!fontsLoaded) {
         return <AppLoading />;
@@ -175,7 +185,7 @@ export default function Country() {
             ) :
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
-                        Loading  
+                        Loading
                     </Text>
                     <ActivityIndicator
                         size="large"

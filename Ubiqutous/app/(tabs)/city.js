@@ -9,6 +9,7 @@ import { fetchMonuments } from '../../api/serpApi.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 
 export default function City() {
     const navigation = useNavigation();
@@ -16,6 +17,7 @@ export default function City() {
     const { city, urls } = route.params;
 
     const [images, setImages] = useState([]);
+    const [getNames, setGetNames] = useState(false);
     const [imagesReady, setImagesReady] = useState(false);
     const [monuments, setMonuments] = useState([]);
     const [monumentsImg, setMonumentsImg] = useState([]);
@@ -27,6 +29,7 @@ export default function City() {
 
     useEffect(() => {
         setImagesReady(false);
+        setGetNames(false);
         setMonumentsImg([]);
         setMonuments([]);
         setImages([]);
@@ -46,20 +49,32 @@ export default function City() {
             let dataNames = [];
             try {
                 dataNames = await fetchMonuments(`${city}`);
+                if (dataNames.length === 0) {
+                    console.log("No monuments found, trying with List 1");
+                    dataNames = await fetchMonuments(`${city}+List`);
+                }
+                if (dataNames.length === 0) {
+                    console.log("No monuments found, trying with What To Visit 1");
+                    dataNames = await fetchMonuments(`What+To+Visit${city}`);
+                }
+                setGetNames(true);
                 setMonuments(dataNames);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
-            try {
-                const urls = await Promise.all(
-                    dataNames.map(async (monument) => {
-                        const data = await fetchImagesUnsplash(monument);
-                        return data;
-                    })
-                );
-                setMonumentsImg(urls);
-            } catch (error) {
-                console.error('Error fetching the images:', error);
+            console.log("DATA NAMES: " + dataNames + " length: " + dataNames.length);
+            if (dataNames.length > 0) {
+                try {
+                    const urls = await Promise.all(
+                        dataNames.map(async (monument) => {
+                            const data = await fetchImagesUnsplash(monument);
+                            return data;
+                        })
+                    );
+                    setMonumentsImg(urls);
+                } catch (error) {
+                    console.error('Error fetching the images:', error);
+                }
             }
         }
 
@@ -75,10 +90,11 @@ export default function City() {
             await preloadImages(urls);
             setImagesReady(true);
         }
+        if (getNames) {
+            LoadImages();
+        }
 
-        LoadImages();
-
-    }, [urls])
+    }, [urls, getNames])
 
     if (!fontsLoaded) {
         return <AppLoading />;
@@ -169,7 +185,7 @@ export default function City() {
                                 </TouchableOpacity>
                             ))
                         ) : (
-                            <Text style={styles.title}>Loading...</Text>
+                            <Text style={styles.title}>No Monuments Found</Text>
                         )}
                     </ScrollView>
                 </View>
