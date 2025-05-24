@@ -168,6 +168,7 @@ export default function Country() {
                                     onPress={() => navigation.navigate('city', {
                                         city: city,
                                         urls: citiesImg[index],
+                                        country: country,
                                     })}>
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
                                         <Text style={{

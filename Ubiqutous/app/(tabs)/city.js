@@ -13,7 +13,7 @@ import BackButton from '../../components/backButton.js';
 export default function City() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { city, urls } = route.params;
+    const { city, urls, country } = route.params;
 
     const [images, setImages] = useState([]);
     const [imagesReady, setImagesReady] = useState(false);
@@ -159,6 +159,7 @@ export default function City() {
                                         monument: monument,
                                         city: city,
                                         url: monumentsImg[index],
+                                        country: country,
                                     })}
                                 >
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
