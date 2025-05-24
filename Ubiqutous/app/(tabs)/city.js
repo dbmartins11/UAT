@@ -5,20 +5,20 @@ import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
-import { fetchCities, fetchImages } from '../../api/serpApi.js';
+import { fetchMonuments } from '../../api/serpApi.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 
-export default function Country() {
+export default function City() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { country, urls } = route.params;
+    const { city, urls } = route.params;
 
     const [images, setImages] = useState([]);
     const [imagesReady, setImagesReady] = useState(false);
-    const [cities, setCities] = useState([]);
-    const [citiesImg, setCitiesImg] = useState([]);
+    const [monuments, setMonuments] = useState([]);
+    const [monumentsImg, setMonumentsImg] = useState([]);
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
         OpenSans_400Regular,
@@ -27,15 +27,14 @@ export default function Country() {
 
     useEffect(() => {
         setImagesReady(false);
-        setCitiesImg([]);
-        setCities([]);
+        setMonumentsImg([]);
+        setMonuments([]);
         setImages([]);
 
         const getCountryImages = () => {
             const indImgs = [];
             while (indImgs.length < 4) {
                 const randomIndex = Math.floor(Math.random() * urls.length);
-
                 if (!indImgs.includes(randomIndex)) {
                     indImgs.push(randomIndex);
                 }
@@ -43,26 +42,29 @@ export default function Country() {
             setImages(indImgs);
         };
 
-        const fetchData = async (country) => {
+        const fetchData = async (city) => {
             let dataNames = [];
             try {
-                dataNames = await fetchCities(country + "+all");
-                setCities(dataNames);
+                dataNames = await fetchMonuments(`${city}`);
+                setMonuments(dataNames);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
             try {
                 const urls = await Promise.all(
-                    dataNames.map(async (city) => {
-                        const data = await fetchImagesUnsplash(city);
+                    dataNames.map(async (monument) => {
+                        const data = await fetchImagesUnsplash(monument);
                         return data;
                     })
                 );
-                setCitiesImg(urls);
+                setMonumentsImg(urls);
             } catch (error) {
                 console.error('Error fetching the images:', error);
             }
         }
+
+        fetchData(city);
+        getCountryImages();
 
         const preloadImages = async (urls) => {
             const cacheImages = urls.map((url) => Image.prefetch(url));
@@ -71,12 +73,9 @@ export default function Country() {
 
         const LoadImages = async () => {
             await preloadImages(urls);
-            //await preloadImages(citiesUrls);
             setImagesReady(true);
         }
 
-        fetchData(country);
-        getCountryImages();
         LoadImages();
 
     }, [urls])
@@ -89,7 +88,7 @@ export default function Country() {
         <View style={{ flex: 1, padding: 10 }}>
             {imagesReady ? (
                 <View>
-                    <BackButton></BackButton>
+                    <BackButton />
                     <View style={styles.imgBlock}>
                         {urls[images[0]] && (
                             <Image
@@ -122,8 +121,8 @@ export default function Country() {
                             </View>
                         </View>
                     </View>
-                    {country ?
-                        <Text style={styles.title}>{country}</Text>
+                    {city ?
+                        <Text style={styles.title}>{city}</Text>
                         :
                         <Text style={styles.title}>Undefined</Text>
                     }
@@ -132,15 +131,17 @@ export default function Country() {
                         showsVerticalScrollIndicator={true}
                         contentContainerStyle={styles.scrollContainer}
                     >
-                        {citiesImg.length > 0 ? (
-                            cities.map((city, index) => (
+                        {monumentsImg.length > 0 ? (
+                            monuments.map((monument, index) => (
                                 <TouchableOpacity
                                     key={index}
-                                    style={styles.cities}
-                                    onPress={() => navigation.navigate('city', {
+                                    style={styles.monuments}
+                                    onPress={() => navigation.navigate('monument', {
+                                        monument: monument,
                                         city: city,
-                                        urls: citiesImg[index],
-                                    })}>
+                                        url: monumentsImg[index],
+                                    })}
+                                >
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
                                         <Text style={{
                                             fontFamily: 'OpenSans_400Regular',
@@ -148,20 +149,20 @@ export default function Country() {
                                             fontWeight: 'bold',
                                             textTransform: 'uppercase',
                                         }}>
-                                            {city}
+                                            {monument}
                                         </Text>
                                     </View>
                                     <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
                                         <Image
-                                            source={{ uri: citiesImg[index][0] }}
+                                            source={{ uri: monumentsImg[index][0] }}
                                             style={styles.cityImg}>
                                         </Image>
                                         <Image
-                                            source={{ uri: citiesImg[index][1] }}
+                                            source={{ uri: monumentsImg[index][1] }}
                                             style={styles.cityImg}>
                                         </Image>
                                         <Image
-                                            source={{ uri: citiesImg[index][2] }}
+                                            source={{ uri: monumentsImg[index][2] }}
                                             style={styles.cityImg}>
                                         </Image>
                                     </View>
@@ -175,7 +176,7 @@ export default function Country() {
             ) :
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
-                        Loading  
+                        Loading
                     </Text>
                     <ActivityIndicator
                         size="large"
@@ -233,7 +234,7 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         borderRadius: 5,
     },
-    cities: {
+    monuments: {
         width: '100%',
         height: 120,
         padding: '2%',

@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ImageBackground, Image, ScrollView, TouchableOpacity  } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import AppLoading from 'expo-app-loading';
 import { useNavigation, Link } from 'expo-router';
 import SearchBar from '../../components/SearchBar';
-import { fetchImages, fetchImagesUnsplash } from '../../api/api.js';
+import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
+import { PermissionsAndroid, Platform } from 'react-native';
 
 export default function Home() {
     const navigation = useNavigation();
@@ -17,28 +18,42 @@ export default function Home() {
     const [urls, setUrls] = useState([]);
     const popularTouristCountries = [
         "Portugal",
-        //"France",
-        // "Spain", "USA", 
+        "France",
+        "Spain", "USA",
         // "China", "Italy", "Turkey",
         // "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
     ];
 
     useEffect(() => {
+
+        const requestLocationPermission = async () => {
+            if (Platform.OS === 'android') {
+                const granted = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+                );
+                return granted === PermissionsAndroid.RESULTS.GRANTED;
+            }
+            return true;
+        };
+
         const fetchData = async () => {
             try {
-                const urls = [];
-                for (const country of popularTouristCountries) {
-                    //const data = await fetchImages(country);
-                    const data = await fetchImagesUnsplash(country + " landmarks and tourism");
-                    urls.push(data);
-                }
+                const urls = await Promise.all(
+                    popularTouristCountries.map(async (country) => {
+                        const data = await fetchImagesUnsplash(country + " landmarks and tourism");
+                        return data;
+                    })
+                );                
                 setUrls(urls);
             }
             catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
+
         fetchData();
+        //requestLocationPermission();
+
     }, [])
 
     const handleSearch = (text) => {
@@ -75,7 +90,7 @@ export default function Home() {
                     urls.length > 0 ?
                         popularTouristCountries.map((country, index) => {
                             return (
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={styles.countryBlock} key={index}
                                     onPress={() => navigation.navigate('country', {
                                         country: country,
