@@ -30,7 +30,8 @@ export default function ProfileScreen() {
   const [email, setEmail] = useState('');
   const [aboutMe, setAboutMe] = useState('');
   const [language, setLanguage] = useState('en');
-
+  const [myLists, setMyLists] = useState([]);
+  
   useFocusEffect(
   useCallback(() => {
     let isActive = true;
@@ -51,6 +52,7 @@ export default function ProfileScreen() {
         setUsername(data.username || 'Unnamed');
         setEmail(data.email || user.email);
         setAboutMe(data.aboutMe || '');
+        setMyLists(data.myLists || []); 
       }
     };
 
@@ -79,10 +81,10 @@ export default function ProfileScreen() {
     { name: 'Krakow', flag: '🇵🇱', image: require('../../assets/images/krakow.png') },
   ];
 
-  const myLists = [
-    { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/krakow.png') },
-    { title: 'Minha Lista 2', description: 'descrição', image: require('../../assets/images/madeira.png') },
-  ];
+  // const myLists = [
+  //   { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/krakow.png') },
+  //   { title: 'Minha Lista 2', description: 'descrição', image: require('../../assets/images/madeira.png') },
+  // ];
 
   const handleLogout = async () => {
     try {
@@ -137,15 +139,21 @@ export default function ProfileScreen() {
           ))}
         </ScrollView>
 
-        {myLists.map((item, index) => (
-          <View key={index} style={[styles.listCard, { backgroundColor: cardColor }]}>
-            <View>
-              <Text style={[styles.listTitle, { color: textColor }]}>{item.title}</Text>
-              <Text style={[styles.listDescription, { color: subtitleColor }]}>{item.description}</Text>
-            </View>
-            <Image source={item.image} style={styles.listImage} />
-          </View>
-        ))}
+        {myLists.length == [] ? (
+          <Text style={{ color: subtitleColor, marginBottom: 16, textAlign: 'center' }}>
+            {'No lists yet. Go to a country page and create your first list!'}
+          </Text>
+        ) : (
+          myLists.map((item, index) => (
+            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() => router.push('/lists')}>
+              <View>
+                <Text style={[styles.listTitle, { color: textColor }]}>{item.title}</Text>
+                <Text style={[styles.listDescription, { color: subtitleColor }]}>{item.description}</Text>
+              </View>
+              <Image source={item.image} style={styles.listImage} />
+            </TouchableOpacity>
+          ))
+        )}
 
         <TouchableOpacity
             style={[
