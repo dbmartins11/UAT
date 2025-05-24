@@ -46,14 +46,6 @@ export default function ListScreen() {
     }, [])
   );
 
-  const firstLetter = username.charAt(0).toUpperCase();
-
-  const visitedCountries = [
-    { name: 'Madeira', flag: '🇵🇹', image: require('../../assets/images/madeira.png') },
-    { name: 'Maribor', flag: '🇸🇮', image: require('../../assets/images/maribor.png') },
-    { name: 'Krakow', flag: '🇵🇱', image: require('../../assets/images/krakow.png') },
-  ];
-
   const myLists = [
     { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/krakow.png') },
     { title: 'Minha Lista 2', description: 'descrição', image: require('../../assets/images/madeira.png') },
@@ -69,83 +61,9 @@ export default function ListScreen() {
   };
 
   return (
-        <View style={{ flex: 1, padding: 10 }}>
-            <View style={styles.imgBlock}>
-                {urls[images[0]] && (
-                    <Image
-                        source={{ uri: urls[images[0]] }}
-                        style={styles.firstImg}
-                    />
-                )}
-
-                <View style={styles.imgBlock_1}>
-                    {urls[images[1]] && (
-                        <Image
-                            source={{ uri: urls[images[1]] }}
-                            style={styles.secondImg}
-                        />
-                    )}
-
-                    <View style={styles.imgBlock_2}>
-                        {urls[images[2]] && (
-                            <Image
-                                source={{ uri: urls[images[2]] }}
-                                style={styles.thirdImg}
-                            />
-                        )}
-                        {urls[images[3]] && (
-                            <Image
-                                source={{ uri: urls[images[3]] }}
-                                style={styles.thirdImg}
-                            />
-                        )}
-                    </View>
-                </View>
-            </View>
-            {country ?
-                <Text style={styles.title}>{country}</Text>
-                :
-                <Text style={styles.title}>Undefined</Text>
-            }
-            <ScrollView
-                horizontal={false}
-                showsVerticalScrollIndicator={true}
-                contentContainerStyle={styles.scrollContainer}
-            >
-                {citiesImg.length > 0 ? (
-                    cities.map((city, index) => (
-                        <View key={index} style={styles.cities}>
-                            <View style={{ width: '30%', justifyContent: 'center' }}>
-                                <Text style={{
-                                    fontFamily: 'OpenSans_400Regular',
-                                    fontSize: 17,
-                                    fontWeight: 'bold',
-                                    textTransform: 'uppercase',
-                                }}>
-                                    {city}
-                                </Text>
-                            </View>
-                            <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
-                                <Image
-                                    source={{ uri: citiesImg[index][0] }}
-                                    style={styles.cityImg}>
-                                </Image>
-                                <Image
-                                    source={{ uri: citiesImg[index][1] }}
-                                    style={styles.cityImg}>
-                                </Image>
-                                <Image
-                                    source={{ uri: citiesImg[index][2] }}
-                                    style={styles.cityImg}>
-                                </Image>
-                            </View>
-                        </View>
-                    ))
-                ) : (
-                    <Text style={styles.title}>Loading...</Text>
-                )}
-            </ScrollView>
-        </View>
+    <View style={styles.background}>
+      <Text>Hello World</Text>
+    </View>
   );
 }
 
