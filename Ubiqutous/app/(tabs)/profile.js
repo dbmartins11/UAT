@@ -9,15 +9,18 @@ import {
   ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../firebase/firebaseConf';
-import { doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { useTheme } from '../../components/ThemeContext';
 import { getCurrentLanguage, translate } from '../../utils/languageUtils';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 export default function ProfileScreen() {
+  
+  const navigation = useNavigation();
   const router = useRouter();
   const { darkMode } = useTheme();
 
@@ -40,9 +43,9 @@ export default function ProfileScreen() {
       const lang = await getCurrentLanguage();
       setLanguage(lang); // Isto vai forçar rerender com novo idioma
 
-      const user = auth.currentUser;
-      if (!user) return;
 
+      const user = auth.currentUser;  
+      if (!user) return;
       await user.reload();
       const docRef = doc(db, 'users', user.uid);
       const docSnap = await getDoc(docRef);
@@ -52,8 +55,19 @@ export default function ProfileScreen() {
         setUsername(data.username || 'Unnamed');
         setEmail(data.email || user.email);
         setAboutMe(data.aboutMe || '');
-        setMyLists(data.myLists || []); 
       }
+
+
+      console.log('Fetching user lists...');
+      const listsRef = collection(db, 'users', user.uid, 'lists');      
+      console.log('User data fetched:' + user.uid);
+      const snapshot = await getDocs(listsRef);
+      const lists = [];
+      snapshot.forEach(doc => {
+        console.log('List found:', doc.id, doc.data());
+        lists.push({ id: doc.id, ...doc.data() });
+      });
+        setMyLists(lists);
     };
 
     fetchData();
@@ -95,6 +109,16 @@ export default function ProfileScreen() {
     }
   };
 
+  const handleList = async (listName) => {
+    try {
+      listName = router.params;
+      router.push('/lists');
+      }
+      catch (error) {
+      alert('Error going to lists: ' + error.message);
+    }
+  }
+
   return (
     <ImageBackground
       source={require('../../assets/images/background.png')}
@@ -119,7 +143,7 @@ export default function ProfileScreen() {
             <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('wished_countries', language)}</Text>
           </View>
           <View style={[styles.statBox, { backgroundColor: cardColor }]}>
-            <Text style={[styles.statNumber, { color: textColor }]}>5</Text>
+            <Text style={[styles.statNumber, { color: textColor }]}>{myLists.length}</Text>
             <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('my_lists', language)}</Text>
           </View>
         </View>
@@ -139,18 +163,22 @@ export default function ProfileScreen() {
           ))}
         </ScrollView>
 
+
+        <Text style={[styles.sectionTitle, { color: textColor }]}> Lists </Text>  
         {myLists.length == [] ? (
           <Text style={{ color: subtitleColor, marginBottom: 16, textAlign: 'center' }}>
             {'No lists yet. Go to a country page and create your first list!'}
           </Text>
         ) : (
           myLists.map((item, index) => (
-            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() => router.push('/lists')}>
+            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() => navigation.navigate('lists', {
+                                        listName: item.name,
+                                        userID: auth.currentUser.uid,
+                                  })}>
               <View>
-                <Text style={[styles.listTitle, { color: textColor }]}>{item.title}</Text>
+                <Text style={[styles.listTitle, { color: textColor }]}>{item.name}</Text>
                 <Text style={[styles.listDescription, { color: subtitleColor }]}>{item.description}</Text>
               </View>
-              <Image source={item.image} style={styles.listImage} />
             </TouchableOpacity>
           ))
         )}

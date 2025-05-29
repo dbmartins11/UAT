@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,64 +6,91 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import { useRouter } from 'expo-router';
-import { signOut } from 'firebase/auth';
+
+import { useNavigation } from '@react-navigation/native';
+import { doc, getDoc, collection } from 'firebase/firestore';
+
 import { auth, db } from '../../firebase/firebaseConf';
-import { doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 
-export default function ListScreen() {
-  const router = useRouter();
+import { useRoute } from '@react-navigation/native';
 
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [aboutMe, setAboutMe] = useState('');
+export default function ListScreen() {
+  const route = useRoute();
+  const { userID, listName } = route.params;
+
+  const [listContent, setList] = useState([]);
+ 
+  useEffect(() => {
+    const getLists = async () => {
+              if (!userID) return;
+              try {
+                    const listRef = doc(db, 'users', userID, 'lists', listName);
+                    const snapshot = await getDoc(listRef);
+                    if (snapshot.exists()) {
+                      setList([ { id: snapshot.id, ...snapshot.data() } ]);
+                    } else {
+                      setList([]);
+                    }
+                    console.log('List fetched:', listContent);
+              } catch (error) {
+                  console.error('Error fetching lists:', error);
+              }
+          };
+          
+      getLists();
+  }, [])
+
 
   useFocusEffect(
     useCallback(() => {
-      const fetchUserData = async () => {
-        try {
-          const user = auth.currentUser;
-          if (!user) return;
-
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
-
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            setUsername(data.username || 'Unnamed');
-            setEmail(data.email || user.email);
-            setAboutMe(data.aboutMe || '');
-          } else {
-            console.log('No such document!');
-          }
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
+      let isActive = true;
+  
+      const getLists = async () => {
+            if (!userID) return;
+            try {
+                  const listRef = doc(db, 'users', userID, 'lists', listName);
+                  const snapshot = await getDoc(listRef);
+                  if (snapshot.exists()) {
+                    setList([ { id: snapshot.id, ...snapshot.data() } ]);
+                  } else {
+                    setList([]);
+                  }
+                  console.log('List fetched:', listContent);
+            } catch (error) {
+                console.error('Error fetching lists:', error);
+            }
+        };
+      getLists();
+  
+      return () => {
+        isActive = false;
       };
-
-      fetchUserData();
-    }, [])
+    }, []) // Deixa dependências vazias!
   );
+  
 
-  const myLists = [
-    { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/krakow.png') },
-    { title: 'Minha Lista 2', description: 'descrição', image: require('../../assets/images/madeira.png') },
-  ];
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.replace('/login');
-    } catch (error) {
-      alert('Error during logout: ' + error.message);
-    }
-  };
+  const navigation = useNavigation();
 
   return (
-    <View style={styles.background}>
-      <Text>Hello World</Text>
-    </View>
+    <ScrollView style={styles.background}>
+      <View style={{ position: 'absolute', top: 40, left: 20, zIndex: 1 }}>
+        <Text
+          style={{
+            fontSize: 18,
+            color: '#3A5BA0',
+            fontWeight: 'bold',
+            padding: 8,
+          }}
+          onPress={() => navigation.goBack()}
+        >
+          ← Back
+        </Text>
+      </View>
+
+      <Text style={styles.sectionTitle}>List: {listName}</Text>
+    </ScrollView>
   );
 }
 
