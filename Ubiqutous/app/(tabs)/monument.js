@@ -21,6 +21,9 @@ import { TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { auth, db } from '../../firebase/firebaseConf';
 
+import { getDocs } from 'firebase/firestore'; // Add this import at the top if not present
+
+
 export default function Monument() {
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
@@ -59,23 +62,45 @@ export default function Monument() {
     const [userID, setUserID] = useState('');
 
     const createList = async () => {
+        console.log("Create List");
+
         if (!listName) {
             console.log("List name is empty, not creating list.");
             return;
         }
 
         try {
-            await setDoc(doc(db, 'users', userID, "listas"), {
-                listName: listName,
+            console.log("Creating list with name:", listName);
+            const userListsRef = collection(db, 'users', userID, 'lists');
+            await setDoc(doc(userListsRef, listName), {
+                name: listName,
+                monument,
+                city,
+                country,
             });
             console.log("List created successfully:", listName);
             setModalVisible(false);
+            getLists(); // Refresh the list of lists after creating a new one
         } catch (error) {
             Alert.alert('Error creating list', error.message);
     }
     };
 
-
+    const getLists = async () => {
+                if (!userID) return;
+                try {
+                    const listsRef = collection(db, 'users', userID, 'lists');
+                    const snapshot = await getDocs(listsRef);
+                    const lists = [];
+                    snapshot.forEach(doc => {
+                        lists.push({ id: doc.id, ...doc.data() });
+                    });
+                    setMyLists(lists);
+                } catch (error) {
+                    console.error('Error fetching lists:', error);
+                }
+            };
+            
     useEffect(() => {
         //monument === undefined ? monument = "Torre Eiffel" : monument = monument; 
         const fetchData = async (monument) => {
@@ -120,17 +145,6 @@ export default function Monument() {
                 console.error('Error getting location:', error);
             }
         }
-
-        const getLists = async () => {
-            if (!userID) return;
-            const docRef = doc(db, 'users', userID);
-            const docSnap = await getDoc(docRef);
-
-            if (docSnap.exists() && isActive) {
-                const data = docSnap.data();
-                setMyLists(data.myLists || []); 
-            }
-        };
 
         const getUserID = async () => {
             const id = await AsyncStorage.getItem('userID');
@@ -234,7 +248,13 @@ export default function Monument() {
                                     padding: 20,
                                 }}>
                                 <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
-                                {myLists.length == [] ? (
+                                     {(
+                                    myLists.map((list, idx) => (
+                                        <View key={idx} style={{ marginBottom: 10 }}>
+                                            <Text>{list.name || `List ${idx + 1}`}</Text>
+                                        </View>
+                                    ))
+                                )}
                                     <TouchableOpacity
                                         style={{
                                             backgroundColor: '#000',
@@ -302,13 +322,6 @@ export default function Monument() {
                                         </Modal>
                                         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                     </TouchableOpacity>
-                                ) : (
-                                    myLists.map((list, idx) => (
-                                        <View key={idx} style={{ marginBottom: 10 }}>
-                                            <Text>{list.name || `List ${idx + 1}`}</Text>
-                                        </View>
-                                    ))
-                                )}
                             </View>
                         </TouchableWithoutFeedback>
                     </View>
