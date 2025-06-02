@@ -7,6 +7,9 @@ import { useNavigation, Link } from 'expo-router';
 import SearchBar from '../../components/SearchBar';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { PermissionsAndroid, Platform } from 'react-native';
+import { auth } from '../../firebase/firebaseConf.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 export default function Home() {
     const navigation = useNavigation();
@@ -24,7 +27,14 @@ export default function Home() {
         // "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
     ];
 
+
     useEffect(() => {
+        console.log('User ID:', auth.currentUser?.uid);
+        const storeUserID = async () => {
+            try {await AsyncStorage.setItem('userID', auth.currentUser.uid);}
+            catch (error) {
+                console.error('Error saving user ID:', error);
+        }};
 
         const requestLocationPermission = async () => {
             if (Platform.OS === 'android') {
@@ -51,6 +61,7 @@ export default function Home() {
             }
         };
 
+        storeUserID();
         fetchData();
         //requestLocationPermission();
 
