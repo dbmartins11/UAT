@@ -91,11 +91,6 @@ export default function ProfileScreen() {
     { name: 'Krakow', flag: '🇵🇱', image: require('../../assets/images/krakow.png') },
   ];
 
-  // const myLists = [
-  //   { title: 'Minha Lista 1', description: 'descrição', image: require('../../assets/images/krakow.png') },
-  //   { title: 'Minha Lista 2', description: 'descrição', image: require('../../assets/images/madeira.png') },
-  // ];
-
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -107,8 +102,7 @@ export default function ProfileScreen() {
 
   const handleList = async (listName) => {
     try {
-      listName = router.params;
-      router.push('/lists');
+      navigation.navigate('lists', {listName: listName, userID: auth.currentUser.uid,});
       }
       catch (error) {
       alert('Error going to lists: ' + error.message);
@@ -167,10 +161,8 @@ export default function ProfileScreen() {
           </Text>
         ) : (
           myLists.map((item, index) => (
-            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() => navigation.navigate('lists', {
-                                        listName: item.name,
-                                        userID: auth.currentUser.uid,
-                                  })}>
+            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() => 
+                                  handleList(item.name)}>
               <View>
                 <Text style={[styles.listTitle, { color: textColor }]}>{item.name}</Text>
                 <Text style={[styles.listDescription, { color: subtitleColor }]}>{item.description}</Text>
