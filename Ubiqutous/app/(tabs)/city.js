@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
 import { fetchMonuments } from '../../api/serpApi.js';
+import { fetchMonumentsWiki } from '../../api/apiWikipedia.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
@@ -14,7 +16,7 @@ import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 export default function City() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { city, urls } = route.params;
+    const { city, urls, country, prevUrls } = route.params;
 
     const [images, setImages] = useState([]);
     const [getNames, setGetNames] = useState(false);
@@ -27,60 +29,61 @@ export default function City() {
         CrimsonText_400Regular,
     });
 
-    useEffect(() => {
-        setImagesReady(false);
-        setGetNames(false);
-        setMonumentsImg([]);
-        setMonuments([]);
-        setImages([]);
+    useFocusEffect(
+        useCallback(() => {
+            console.log('CITY PAGE LOADED');
+            setImagesReady(false);
+            setGetNames(false);
+            setMonumentsImg([]);
+            setMonuments([]);
+            setImages([]);
 
-        const getCountryImages = () => {
-            const indImgs = [];
-            while (indImgs.length < 4) {
-                const randomIndex = Math.floor(Math.random() * urls.length);
-                if (!indImgs.includes(randomIndex)) {
-                    indImgs.push(randomIndex);
+            const getCountryImages = () => {
+                const indImgs = [];
+                while (indImgs.length < 4) {
+                    const randomIndex = Math.floor(Math.random() * urls.length);
+                    if (!indImgs.includes(randomIndex)) {
+                        indImgs.push(randomIndex);
+                    }
                 }
-            }
-            setImages(indImgs);
-        };
+                setImages(indImgs);
+            };
 
         const fetchData = async (city) => {
             let dataNames = [];
             try {
-                dataNames = await fetchMonuments(`${city}`);
-                if (dataNames.length === 0) {
-                    console.log("No monuments found, trying with List 1");
-                    dataNames = await fetchMonuments(`${city}+List`);
+                dataNames = await fetchMonuments(city);
+                if (dataNames.length === 0 || dataNames === undefined) {
+                    dataNames = await fetchMonumentsWiki(`${city}`);
                 }
-                if (dataNames.length === 0) {
-                    console.log("No monuments found, trying with What To Visit 1");
-                    dataNames = await fetchMonuments(`What+To+Visit${city}`);
-                }
-                setGetNames(true);
                 setMonuments(dataNames);
+                setGetNames(true);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
-            console.log("DATA NAMES: " + dataNames + " length: " + dataNames.length);
-            if (dataNames.length > 0) {
-                try {
-                    const urls = await Promise.all(
-                        dataNames.map(async (monument) => {
-                            const data = await fetchImagesUnsplash(monument);
-                            return data;
-                        })
-                    );
-                    setMonumentsImg(urls);
-                } catch (error) {
-                    console.error('Error fetching the images:', error);
-                }
+            try {
+                const urls = await Promise.all(
+                    dataNames.map(async (monument) => {
+                        const data = await fetchImagesUnsplash(monument);
+                        return data;
+                    })
+                );
+                setMonumentsImg(urls);
+            } catch (error) {
+                console.error('Error fetching the images:', error);
             }
         }
 
-        fetchData(city);
-        getCountryImages();
+            fetchData(city);
+            getCountryImages();
 
+            // Opcional: função de limpeza
+            return () => { };
+        }, [city, urls])
+    );
+
+
+    useEffect(() => {
         const preloadImages = async (urls) => {
             const cacheImages = urls.map((url) => Image.prefetch(url));
             await Promise.all(cacheImages);
@@ -88,23 +91,35 @@ export default function City() {
 
         const LoadImages = async () => {
             await preloadImages(urls);
+            //await preloadImages(citiesUrls);
             setImagesReady(true);
         }
+
         if (getNames) {
             LoadImages();
         }
 
-    }, [urls, getNames])
+    }, [getNames]);
+
 
     if (!fontsLoaded) {
         return <AppLoading />;
+    }
+
+    const onPress = () => {
+        navigation.navigate('country', {
+            country: country,
+            urls: prevUrls
+        });
     }
 
     return (
         <View style={{ flex: 1, padding: 10 }}>
             {imagesReady ? (
                 <View>
-                    <BackButton />
+                    <BackButton
+                        onPress={onPress}
+                    > </BackButton>
                     <View style={styles.imgBlock}>
                         {urls[images[0]] && (
                             <Image
@@ -156,6 +171,7 @@ export default function City() {
                                         monument: monument,
                                         city: city,
                                         url: monumentsImg[index],
+                                        prevUrls: urls,
                                     })}
                                 >
                                     <View style={{ width: '30%', justifyContent: 'center' }}>

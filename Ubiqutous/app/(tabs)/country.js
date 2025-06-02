@@ -95,11 +95,14 @@ export default function Country() {
         return <AppLoading />;
     }
 
+
     return (
         <View style={{ flex: 1, padding: 10 }}>
             {imagesReady ? (
                 <View>
-                    <BackButton></BackButton>
+                    <BackButton
+                        onPress={() => navigation.goBack()}
+                    ></BackButton>
                     <View style={styles.imgBlock}>
                         {urls[images[0]] && (
                             <Image
@@ -150,6 +153,8 @@ export default function Country() {
                                     onPress={() => navigation.navigate('city', {
                                         city: city,
                                         urls: citiesImg[index],
+                                        country: country,
+                                        prevUrls: urls,
                                     })}>
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
                                         <Text style={{

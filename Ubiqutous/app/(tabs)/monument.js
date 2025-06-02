@@ -15,20 +15,25 @@ import * as Location from 'expo-location';
 const { height: screenHeight } = Dimensions.get('window');
 
 export default function Monument() {
+    const navigation = useNavigation();
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
         OpenSans_600SemiBold,
         CrimsonText_400Regular,
     });
+    const [hasUrls, setHasUrls] = useState(false);
     const [description, setDescription] = useState([]);
     const [coordinatesC, setCoordinatesC] = useState([]);
     const [selfCoordinates, setSelfCoordinates] = useState([]);
     const [MCoordinates, setMCoordinates] = useState([]);
     const route = useRoute();
-    const { monument, city, url } = route.params;
+    const { monument, city, url, prevUrls } = route.params;
 
     useEffect(() => {
         //monument === undefined ? monument = "Torre Eiffel" : monument = monument; 
+        let url_;
+        url === undefined ? url_ = false : url_ = true;
+        setHasUrls(url_);
         const fetchData = async (monument) => {
             try {
                 const data = await fetchMonumentDescription(monument);
@@ -38,9 +43,10 @@ export default function Monument() {
             }
         }
 
-        const fetchCoordinatesC = async (monument) => {
+        const fetchCoordinatesC = async () => {
             try {
                 const coordsC = await fetchCoordinates(city);
+
                 setCoordinatesC(coordsC);
             } catch (error) {
                 console.error('Error fetching the coordinates:', error);
@@ -49,7 +55,7 @@ export default function Monument() {
 
         const fetchCoordinatesM = async (monument) => {
             try {
-                const coordsM = await fetchCoordinates(monument + ", " + city);
+                const coordsM = await fetchCoordinates(monument + " " + city);
                 setMCoordinates(coordsM);
             } catch (error) {
                 console.error('Error fetching the coordinates:', error);
@@ -82,22 +88,38 @@ export default function Monument() {
         return <AppLoading />;
     }
 
+    const onPress = () => {
+        navigation.navigate('city', {
+            city: city,
+            url: prevUrls,
+        });
+    }
+
     return (
         <ScrollView
             horizontal={false}
             showsVerticalScrollIndicator={true}
             contentContainerStyle={styles.scrollContainer}>
             <View style={styles.main}>
-                <ImageBackground
-                    source={{ uri: url[7] }}
-                    style={styles.mainImg}>
-                    <BackButton style={styles.backButtonOverlay} />
-                </ImageBackground>
+                {hasUrls === true ? (
+                    <ImageBackground
+                        source={{ uri: url[7] }}
+                        style={styles.mainImg}>
+                        <BackButton
+                            style={styles.backButtonOverlay}
+                            onPress={onPress} />
+                    </ImageBackground>
+                ) : (
+                    <Text style={styles.description}>
+                        No images to display
+                    </Text>
+                )}
             </View>
             <Text style={styles.description}>
                 {description}
             </Text>
-            {coordinatesC.length > 0 ? (
+            {console.log("CoordinatesC: ", coordinatesC)}
+            {coordinatesC !== null && coordinatesC.length > 0 ? (
                 <MapView
                     style={{ width: '100%', height: screenHeight * 0.4 }}
                     initialRegion={{
@@ -107,7 +129,8 @@ export default function Monument() {
                         longitudeDelta: 0.0421,
                     }}
                 >
-                    {MCoordinates.length > 0 && (
+                    {console.log("CoordinatesM: ", MCoordinates)}
+                    {MCoordinates !==  null &&  (
                         <Marker
                             coordinate={{
                                 latitude: MCoordinates[0],
@@ -116,7 +139,14 @@ export default function Monument() {
                             title={monument}
                             description={description}
                         />
-                    )}
+                    )
+                    // :(
+                    //     <Text style={styles.description}>
+                    //         Coordinates not found for the monument.
+                    //     </Text>
+                    // )
+                
+                }
                     {selfCoordinates.length > 0 && (
                         <Marker
                             coordinate={{
@@ -128,7 +158,7 @@ export default function Monument() {
                     )}
                 </MapView>
 
-            ):(
+            ) : (
                 <Text style={styles.description}>
                     Loading map...
                 </Text>)
