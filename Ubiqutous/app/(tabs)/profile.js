@@ -57,14 +57,10 @@ export default function ProfileScreen() {
         setAboutMe(data.aboutMe || '');
       }
 
-
-      console.log('Fetching user lists...');
-      const listsRef = collection(db, 'users', user.uid, 'lists');      
-      console.log('User data fetched:' + user.uid);
+      const listsRef = collection(db, 'users', user.uid, 'lists');     
       const snapshot = await getDocs(listsRef);
       const lists = [];
       snapshot.forEach(doc => {
-        console.log('List found:', doc.id, doc.data());
         lists.push({ id: doc.id, ...doc.data() });
       });
         setMyLists(lists);

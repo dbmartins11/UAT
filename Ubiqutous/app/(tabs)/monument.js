@@ -7,7 +7,6 @@ import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchMonumentDescription } from '../../api/apiWikipedia.js';
 import { fetchCoordinates } from '../../api/apiNominatim.js';
-import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 import MapView, { Marker } from 'react-native-maps';
 import { Dimensions } from 'react-native';
@@ -15,12 +14,11 @@ import * as Location from 'expo-location';
 import { useRef } from 'react';
 import { TouchableWithoutFeedback } from 'react-native';
 const { height: screenHeight } = Dimensions.get('window');
-import { doc, getDoc, setDoc, addDoc, collection, updateDoc } from 'firebase/firestore';
-import {Modal} from 'react-native';
-import { TextInput } from 'react-native';
+import { doc, getDoc, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
+import { TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { auth, db } from '../../firebase/firebaseConf';
-
+import { db } from '../../firebase/firebaseConf';
+import * as Notifications from "expo-notifications";
 import { getDocs } from 'firebase/firestore'; // Add this import at the top if not present
 
 
@@ -32,16 +30,28 @@ export default function Monument() {
     });
     
     const [description, setDescription] = useState([]);
-    const [listName, setListName] = useState('');
+
     const [coordinatesC, setCoordinatesC] = useState([]);
     const [selfCoordinates, setSelfCoordinates] = useState([]);
     const [MCoordinates, setMCoordinates] = useState([]);
     const route = useRoute();
     const { monument, city, url, country } = route.params;
 
+    const [listName, setListName] = useState('');
+    const [myLists, setMyLists] = useState([]);
+    const [userID, setUserID] = useState('');
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const sidebarRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
+
+    Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+            shouldShowAlert: true,
+            shouldPlaySound: true,
+            shouldSetBadge: true,
+        }),
+    });
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -57,10 +67,6 @@ export default function Monument() {
         }
     };
 
-    
-    const [myLists, setMyLists] = useState([]);
-    const [userID, setUserID] = useState('');
-
     const createList = async () => {
         console.log("Create List");
 
@@ -70,40 +76,105 @@ export default function Monument() {
         }
 
         try {
-            console.log("Creating list with name:", listName);
             const userListsRef = collection(db, 'users', userID, 'lists');
-            await setDoc(doc(userListsRef, listName), {
+            const listDoc = doc(userListsRef, listName);
+            const docSnap = await getDoc(listDoc);
+            if (docSnap.exists()) {
+                Alert.alert('List already exists', 'Please choose a different name.');
+                return;
+            }
+            await setDoc(listDoc, {
                 name: listName,
-                attractions : [monument,
-                city,
-                country,],
+                countries: {
+                    [country]: {
+                        visited: false,
+                        cities: {
+                            [city]: {
+                                visited: false,
+                                monuments: [{ name: monument, visited: false }]
+                            }
+                        }
+                    }
+                }
             });
+
+            const generateNotification = async () => {
+                //show the notification to the user
+                Notifications.scheduleNotificationAsync({
+                    //set the content of the notification
+                    content: {
+                    title: "List Created",
+                    body: "Added " + monument + " to " + listName,
+                    },
+                    trigger: null,
+                });
+            };
+
             console.log("List created successfully:", listName);
             setModalVisible(false);
-            getLists(); // Refresh the list of lists after creating a new one
+            getLists();
         } catch (error) {
             Alert.alert('Error creating list', error.message);
-    }
+        }
     };
 
     const updateList = async (listName, monument) => {
-        console.log("Update List"); 
-    }
+        try {
+            const userListsRef = collection(db, 'users', userID, 'lists');
+            const listDoc = doc(userListsRef, listName);
+            const docSnap = await getDoc(listDoc);
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.countries[country] && data.countries[country].cities[city]) {
+                    // City exists, append monument
+                    await updateDoc(listDoc, {
+                        [`countries.${country}.cities.${city}.monuments`]: arrayUnion({ name: monument, visited: false })
+                    });
+                } else if (data.countries[country]) {
+                    // Country exists, add new city
+                    await updateDoc(listDoc, {
+                        [`countries.${country}.cities.${city}`]: {
+                            visited: false,
+                            monuments: [{ name: monument, visited: false }]
+                        }
+                    });
+                } else {
+                    // Country doesn't exist, create it
+                    await updateDoc(listDoc, {
+                        [`countries.${country}`]: {
+                            visited: false,
+                            cities: {
+                                [city]: {
+                                    visited: false,
+                                    monuments: [{ name: monument, visited: false }]
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            console.log("Monument added to list:", listName);
+            getLists();
+        } catch (error) {
+            console.error('Error updating list:', error);
+            Alert.alert('Error updating list', error.message);
+        }
+    };
 
     const getLists = async () => {
-                if (!userID) return;
-                try {
-                    const listsRef = collection(db, 'users', userID, 'lists');
-                    const snapshot = await getDocs(listsRef);
-                    const lists = [];
-                    snapshot.forEach(doc => {
-                        lists.push({ id: doc.id, ...doc.data() });
-                    });
-                    setMyLists(lists);
-                } catch (error) {
-                    console.error('Error fetching lists:', error);
-                }
-            };
+        if (!userID) return;
+        try {
+            const listsRef = collection(db, 'users', userID, 'lists');
+            const snapshot = await getDocs(listsRef);
+            const lists = [];
+            snapshot.forEach(doc => {
+                lists.push({ id: doc.id, ...doc.data() });
+            });
+            setMyLists(lists);
+        } catch (error) {
+            console.error('Error fetching lists:', error);
+        }
+    };
             
     useEffect(() => {
         //monument === undefined ? monument = "Torre Eiffel" : monument = monument; 
