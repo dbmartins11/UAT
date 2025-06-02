@@ -111,7 +111,7 @@ export default function Monument() {
             };
 
             console.log("List created successfully:", listName);
-            setModalVisible(false);
+            setModalVisible(false);            
             getLists();
         } catch (error) {
             Alert.alert('Error creating list', error.message);
@@ -123,6 +123,8 @@ export default function Monument() {
             const userListsRef = collection(db, 'users', userID, 'lists');
             const listDoc = doc(userListsRef, listName);
             const docSnap = await getDoc(listDoc);
+
+            console.log("Updating list:", listName, "with monument:", monument);
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 if (data.countries[country] && data.countries[country].cities[city]) {
