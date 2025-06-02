@@ -9,12 +9,14 @@ import { fetchCities, fetchImages } from '../../api/serpApi.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 
 export default function Country() {
     const navigation = useNavigation();
     const route = useRoute();
     const { country, urls } = route.params;
 
+    const [getUrls, setUrls] = useState(urls || []);
     const [getNames, setGetNames] = useState(false);
     const [images, setImages] = useState([]);
     const [imagesReady, setImagesReady] = useState(false);
@@ -36,7 +38,7 @@ export default function Country() {
         const getCountryImages = () => {
             const indImgs = [];
             while (indImgs.length < 4) {
-                const randomIndex = Math.floor(Math.random() * urls.length);
+                const randomIndex = Math.floor(Math.random() * getUrls.length);
 
                 if (!indImgs.includes(randomIndex)) {
                     indImgs.push(randomIndex);
@@ -67,9 +69,21 @@ export default function Country() {
             }
         }
 
+        const fetchCoutryImages = async (country) => {
+            try {
+                const data = await fetchImagesUnsplash(country + " landmarks and tourism");
+                setUrls(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        if (urls === undefined) {
+            fetchCoutryImages(country);
+        }
         fetchData(country);
         getCountryImages();
-        
+
     }, [urls]);
 
 
@@ -80,7 +94,7 @@ export default function Country() {
         }
 
         const LoadImages = async () => {
-            await preloadImages(urls);
+            await preloadImages(getUrls);
             //await preloadImages(citiesUrls);
             setImagesReady(true);
         }
@@ -104,31 +118,31 @@ export default function Country() {
                         onPress={() => navigation.goBack()}
                     ></BackButton>
                     <View style={styles.imgBlock}>
-                        {urls[images[0]] && (
+                        {getUrls[images[0]] && (
                             <Image
-                                source={{ uri: urls[images[0]] }}
+                                source={{ uri: getUrls[images[0]] }}
                                 style={styles.firstImg}
                             />
                         )}
 
                         <View style={styles.imgBlock_1}>
-                            {urls[images[1]] && (
+                            {getUrls[images[1]] && (
                                 <Image
-                                    source={{ uri: urls[images[1]] }}
+                                    source={{ uri: getUrls[images[1]] }}
                                     style={styles.secondImg}
                                 />
                             )}
 
                             <View style={styles.imgBlock_2}>
-                                {urls[images[2]] && (
+                                {getUrls[images[2]] && (
                                     <Image
-                                        source={{ uri: urls[images[2]] }}
+                                        source={{ uri: getUrls[images[2]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
-                                {urls[images[3]] && (
+                                {getUrls[images[3]] && (
                                     <Image
-                                        source={{ uri: urls[images[3]] }}
+                                        source={{ uri: getUrls[images[3]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}

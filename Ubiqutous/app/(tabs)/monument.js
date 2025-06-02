@@ -27,7 +27,7 @@ export default function Monument() {
     const [selfCoordinates, setSelfCoordinates] = useState([]);
     const [MCoordinates, setMCoordinates] = useState([]);
     const route = useRoute();
-    const { monument, city, url, prevUrls } = route.params;
+    const { monument, city, country, url, prevUrls } = route.params;
 
     useEffect(() => {
         //monument === undefined ? monument = "Torre Eiffel" : monument = monument; 
@@ -91,6 +91,7 @@ export default function Monument() {
     const onPress = () => {
         navigation.navigate('city', {
             city: city,
+            country: country,
             url: prevUrls,
         });
     }
@@ -118,7 +119,6 @@ export default function Monument() {
             <Text style={styles.description}>
                 {description}
             </Text>
-            {console.log("CoordinatesC: ", coordinatesC)}
             {coordinatesC !== null && coordinatesC.length > 0 ? (
                 <MapView
                     style={{ width: '100%', height: screenHeight * 0.4 }}
@@ -129,8 +129,7 @@ export default function Monument() {
                         longitudeDelta: 0.0421,
                     }}
                 >
-                    {console.log("CoordinatesM: ", MCoordinates)}
-                    {MCoordinates !==  null &&  (
+                    {(MCoordinates !== null && MCoordinates.length > 0) &&  (
                         <Marker
                             coordinate={{
                                 latitude: MCoordinates[0],

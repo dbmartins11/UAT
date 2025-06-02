@@ -32,7 +32,7 @@ export const fetchCities = async (country) => {
 export const fetchMonuments = async (city) => {
     //const monuments = [];
     try {
-        const url = `https://serpapi.com/search.json?engine=google&q=Principais+monumentos+em+${city}&api_key=${serpapiKey}`;
+        const url = `https://serpapi.com/search.json?engine=google&q=Sights+${city}&api_key=${serpapiKey}`;
         console.log('URL: ' + url);
         const response = await fetch(url);
         const data = await response.json();
@@ -40,7 +40,11 @@ export const fetchMonuments = async (city) => {
         .filter(q => q.title !== undefined)
         .map(q => q.title);
         console.log("API MONUMENTS: " + monuments );
-        return monuments;
+
+        const sliced = monuments.slice(0, 10);
+        console.log("API MONUMENTS: " + sliced );
+
+        return sliced;
     }
     catch (error) {
         console.error('Error fetching monuments:', error);

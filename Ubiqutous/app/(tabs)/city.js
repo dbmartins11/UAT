@@ -18,6 +18,7 @@ export default function City() {
     const route = useRoute();
     const { city, urls, country, prevUrls } = route.params;
 
+    const [url, setUrl] = useState(urls || []);
     const [images, setImages] = useState([]);
     const [getNames, setGetNames] = useState(false);
     const [imagesReady, setImagesReady] = useState(false);
@@ -31,7 +32,6 @@ export default function City() {
 
     useFocusEffect(
         useCallback(() => {
-            console.log('CITY PAGE LOADED');
             setImagesReady(false);
             setGetNames(false);
             setMonumentsImg([]);
@@ -41,7 +41,7 @@ export default function City() {
             const getCountryImages = () => {
                 const indImgs = [];
                 while (indImgs.length < 4) {
-                    const randomIndex = Math.floor(Math.random() * urls.length);
+                    const randomIndex = Math.floor(Math.random() * url.length);
                     if (!indImgs.includes(randomIndex)) {
                         indImgs.push(randomIndex);
                     }
@@ -49,36 +49,46 @@ export default function City() {
                 setImages(indImgs);
             };
 
-        const fetchData = async (city) => {
-            let dataNames = [];
-            try {
-                dataNames = await fetchMonuments(city);
-                if (dataNames.length === 0 || dataNames === undefined) {
-                    dataNames = await fetchMonumentsWiki(`${city}`);
+            const fetchData = async (city) => {
+                let dataNames = [];
+                try {
+                    dataNames = await fetchMonuments(city);
+                    if (dataNames.length === 0 || dataNames === undefined) {
+                        dataNames = await fetchMonumentsWiki(`${city}`);
+                    }
+                    setMonuments(dataNames);
+                    setGetNames(true);
+                } catch (error) {
+                    console.error('Error fetching the cities\' names:', error);
                 }
-                setMonuments(dataNames);
-                setGetNames(true);
-            } catch (error) {
-                console.error('Error fetching the cities\' names:', error);
+                try {
+                    const urls = await Promise.all(
+                        dataNames.map(async (monument) => {
+                            const data = await fetchImagesUnsplash(monument);
+                            return data;
+                        })
+                    );
+                    setMonumentsImg(urls);
+                } catch (error) {
+                    console.error('Error fetching the images:', error);
+                }
             }
-            try {
-                const urls = await Promise.all(
-                    dataNames.map(async (monument) => {
-                        const data = await fetchImagesUnsplash(monument);
-                        return data;
-                    })
-                );
-                setMonumentsImg(urls);
-            } catch (error) {
-                console.error('Error fetching the images:', error);
+
+            const fetchCityImages = async (c) => {
+                try {
+                    const data = await fetchImagesUnsplash(c);
+                    setUrl(data);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                }
             }
-        }
+            if (urls === undefined) {
+                fetchCityImages(city);
+            }
 
             fetchData(city);
             getCountryImages();
 
-            // Opcional: função de limpeza
-            return () => { };
         }, [city, urls])
     );
 
@@ -90,7 +100,7 @@ export default function City() {
         }
 
         const LoadImages = async () => {
-            await preloadImages(urls);
+            await preloadImages(url);
             //await preloadImages(citiesUrls);
             setImagesReady(true);
         }
@@ -121,31 +131,31 @@ export default function City() {
                         onPress={onPress}
                     > </BackButton>
                     <View style={styles.imgBlock}>
-                        {urls[images[0]] && (
+                        {url[images[0]] && (
                             <Image
-                                source={{ uri: urls[images[0]] }}
+                                source={{ uri: url[images[0]] }}
                                 style={styles.firstImg}
                             />
                         )}
 
                         <View style={styles.imgBlock_1}>
-                            {urls[images[1]] && (
+                            {url[images[1]] && (
                                 <Image
-                                    source={{ uri: urls[images[1]] }}
+                                    source={{ uri: url[images[1]] }}
                                     style={styles.secondImg}
                                 />
                             )}
 
                             <View style={styles.imgBlock_2}>
-                                {urls[images[2]] && (
+                                {url[images[2]] && (
                                     <Image
-                                        source={{ uri: urls[images[2]] }}
+                                        source={{ uri: url[images[2]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
-                                {urls[images[3]] && (
+                                {url[images[3]] && (
                                     <Image
-                                        source={{ uri: urls[images[3]] }}
+                                        source={{ uri: url[images[3]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
@@ -170,6 +180,7 @@ export default function City() {
                                     onPress={() => navigation.navigate('monument', {
                                         monument: monument,
                                         city: city,
+                                        country: country,
                                         url: monumentsImg[index],
                                         prevUrls: urls,
                                     })}
@@ -286,7 +297,7 @@ const styles = StyleSheet.create({
 
     scrollContainer: {
         flexGrow: 1,
-        paddingBottom: '20%',
+        paddingBottom: '80%',
     },
 
 });
