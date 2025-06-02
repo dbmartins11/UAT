@@ -17,9 +17,10 @@ const { height: screenHeight } = Dimensions.get('window');
 import { doc, getDoc, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
 import { TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { db } from '../../firebase/firebaseConf';
+import { db, auth } from '../../firebase/firebaseConf';
 import * as Notifications from "expo-notifications";
 import { getDocs } from 'firebase/firestore'; // Add this import at the top if not present
+import { use } from 'react';
 
 
 export default function Monument() {
@@ -52,7 +53,7 @@ export default function Monument() {
             shouldSetBadge: true,
         }),
     });
-
+   
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
@@ -124,16 +125,22 @@ export default function Monument() {
             const listDoc = doc(userListsRef, listName);
             const docSnap = await getDoc(listDoc);
 
-            console.log("Updating list:", listName, "with monument:", monument);
+            console.log("Updating list:", listName, "with monument:", monument, "in city:", city, "and country:", country, "for user:", userID);
+
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                if (data.countries[country] && data.countries[country].cities[city]) {
+
+                if (data.countries?.[country]?.cities?.[city]) {
                     // City exists, append monument
+                    console.log("City exists, adding monument:", monument);
                     await updateDoc(listDoc, {
                         [`countries.${country}.cities.${city}.monuments`]: arrayUnion({ name: monument, visited: false })
                     });
-                } else if (data.countries[country]) {
+                    
+                } else if (data.countries?.[country]) {
+                    console.log("City does not exist, adding new city:", city);
                     // Country exists, add new city
+                    console.log("Country exists, adding new city:", city);
                     await updateDoc(listDoc, {
                         [`countries.${country}.cities.${city}`]: {
                             visited: false,
@@ -142,6 +149,7 @@ export default function Monument() {
                     });
                 } else {
                     // Country doesn't exist, create it
+                    console.log("Country does not exist, creating new country:", country);
                     await updateDoc(listDoc, {
                         [`countries.${country}`]: {
                             visited: false,
@@ -225,15 +233,19 @@ export default function Monument() {
 
         const getUserID = async () => {
             const id = await AsyncStorage.getItem('userID');
+            if (!id) {
+                id = auth.currentUser?.uid || 'Unnamed';
+            }
             setUserID(id || 'Unnamed');
             console.log("User ID: ", userID);
         };
 
-        getUserID();
+
         fetchData(monument);
         getLocation();
         fetchCoordinatesC(monument);
-        fetchCoordinatesM(monument);
+        fetchCoordinatesM(monument);        
+        getUserID();
         getLists();
     }, [url])
 
