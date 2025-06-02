@@ -10,6 +10,7 @@ import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
+import { use } from 'react';
 
 export default function Country() {
     const navigation = useNavigation();
@@ -34,6 +35,7 @@ export default function Country() {
         setCitiesImg([]);
         setCities([]);
         setImages([]);
+        setUrls(urls || []);
 
         const getCountryImages = () => {
             const indImgs = [];

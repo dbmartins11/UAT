@@ -37,6 +37,7 @@ export default function City() {
             setMonumentsImg([]);
             setMonuments([]);
             setImages([]);
+            setUrl(urls || []);
 
             const getCountryImages = () => {
                 const indImgs = [];

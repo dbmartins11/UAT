@@ -52,4 +52,15 @@ export const fetchMonuments = async (city) => {
     }
 }
 
-
+export const search = async (query) => {
+    try {
+        const url = `https://serpapi.com/search.json?engine=google&q=${encodeURIComponent(query)}&api_key=${serpapiKey}`;
+        console.log('URL: ' + url);
+        const response = await fetch(url);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error searching:', error);
+        return null;
+    }
+}
