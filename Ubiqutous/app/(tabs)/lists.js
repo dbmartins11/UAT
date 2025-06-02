@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 8,
     borderWidth: 1,
+    borderRadius: 8,
   },
   sectionTitle: {
     fontSize: 20,
