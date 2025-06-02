@@ -158,11 +158,6 @@ export default function Country() {
                 countries: {
                     [country]: {
                         visited: false,
-                        cities: {
-                            [city]: {
-                                visited: false,
-                            }
-                        }
                     }
                 }
             });
@@ -386,7 +381,7 @@ export default function Country() {
                                                                 <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
                                                             </TouchableOpacity>
         
-        
+         
                                                             <TouchableOpacity style={{backgroundColor: '#ccc', paddingVertical: 10,paddingHorizontal: 20,borderRadius: 8,}}
                                                                 onPress={() => setModalVisible(false)}>
                                                                 <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
