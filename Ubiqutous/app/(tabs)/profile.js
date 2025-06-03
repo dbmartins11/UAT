@@ -125,33 +125,10 @@ export default function ProfileScreen() {
 
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: cardColor }]}>
-            <Text style={[styles.statNumber, { color: textColor }]}>5</Text>
-            <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('visited_countries', language)}</Text>
-          </View>
-          <View style={[styles.statBox, { backgroundColor: cardColor }]}>
-            <Text style={[styles.statNumber, { color: textColor }]}>12</Text>
-            <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('wished_countries', language)}</Text>
-          </View>
-          <View style={[styles.statBox, { backgroundColor: cardColor }]}>
             <Text style={[styles.statNumber, { color: textColor }]}>{myLists.length}</Text>
-            <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('my_lists', language)}</Text>
+            <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('My Lists', language)}</Text>
           </View>
         </View>
-
-        <Text style={[styles.sectionTitle, { color: textColor }]}>
-          {translate('visited_countries_section', language)}
-        </Text>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.countriesScroll}>
-          {visitedCountries.map((country, index) => (
-            <View key={index} style={styles.countryCard}>
-              <Image source={country.image} style={styles.countryImage} />
-              <Text style={[styles.countryLabel, { color: textColor }]}>
-                {country.flag} {country.name}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
 
 
         <Text style={[styles.sectionTitle, { color: textColor }]}> Lists </Text>  
