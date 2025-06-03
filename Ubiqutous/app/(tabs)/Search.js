@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, TextInput, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { fetchSearch } from '../../api/apiNominatim';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,20 +7,30 @@ import { Ionicons } from '@expo/vector-icons';
 export default function SearchScreen({ navigation }) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
+  const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setQuery('');
+      setSuggestions([]);
+      setLoading(false);
+      setSearched(false);
+    }, [])
+  );
 
   const fetchSuggestions = async (text) => {
     if (text.length < 3) {
       setSuggestions([]);
       return;
     }
+    else if (text.length >= 3) {
+      setSearched(true);
+    }
 
     setLoading(true);
     try {
       let data = await fetchSearch(text);
-      if (!data || data.length === 0) {
-        data = [{ place_id: 0, display_name: 'Nothing found' }];
-      }
       setSuggestions(data);
     }
     catch (error) {
@@ -33,12 +44,17 @@ export default function SearchScreen({ navigation }) {
     const delayDebounce = setTimeout(() => {
       fetchSuggestions(query);
     }, 500);
-    
+
     return () => clearTimeout(delayDebounce);
   }, [query]);
 
   const handleSelectSuggestion = (item) => {
+    console.log('-------------------------');
+    console.log('Selecionado:', item.addresstype);
     console.log('Selecionado:', item.display_name);
+    console.log('-------------------------');
+    console.log('Selecionado:', item);
+    console.log('-------------------------');
     // Podes agora decidir para onde navegas:
     // Por exemplo: navigation.navigate('city', { city: item.display_name });
   };
@@ -48,14 +64,14 @@ export default function SearchScreen({ navigation }) {
       <View style={styles.searchBox}>
         <Ionicons name="search" size={20} color="#333333" style={{ marginRight: 10 }} />
         <TextInput
-          placeholder="Pesquisar cidades, países ou monumentos..."
+          style={styles.input}
+          placeholder="Search for a city, country or monument"
           value={query}
           onChangeText={setQuery}
-          style={styles.input}
         />
       </View>
 
-      {loading && <Text style={styles.loading}>A carregar sugestões...</Text>}
+      {loading && <Text style={styles.loading}>Loading Suggestions</Text>}
 
       <FlatList
         data={suggestions}
@@ -65,10 +81,15 @@ export default function SearchScreen({ navigation }) {
             style={styles.suggestionItem}
             onPress={() => handleSelectSuggestion(item)}
           >
-            <Text style={styles.suggestionText}>{item.display_name}</Text>
+            {item.name !== undefined && item.address && item.address.country !== undefined && (
+              <Text style={styles.suggestionText}>{item.name}, {item.address.country}</Text>
+            )}
           </TouchableOpacity>
         )}
       />
+      {suggestions.length === 0 && !loading && searched && (
+        <Text style={styles.loading}>No Suggestions Found</Text>
+      )}
     </View>
   );
 }
@@ -81,7 +102,7 @@ const styles = StyleSheet.create({
     display: 'flex',
     flexDirection: 'row',
     width: '80%',
-    height: '20%',
+    height: 50,
     paddingHorizontal: '3%',
     margin: '7%',
     alignSelf: 'center',
@@ -89,6 +110,10 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#DEEFFA',
     color: '#000',
+  },
+  input: {
+    flex: 1,
+    width: '100%',
   },
   loading: {
     marginTop: 10,
