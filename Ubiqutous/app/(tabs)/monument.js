@@ -7,6 +7,7 @@ import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchMonumentDescription } from '../../api/apiWikipedia.js';
 import { fetchCoordinates } from '../../api/apiNominatim.js';
+import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import BackButton from '../../components/backButton.js';
 import MapView, { Marker } from 'react-native-maps';
 import { Dimensions } from 'react-native';
@@ -24,11 +25,14 @@ import { use } from 'react';
 
 
 export default function Monument() {
+    const navigation = useNavigation();
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
         OpenSans_600SemiBold,
         CrimsonText_400Regular,
     });
+    const [hasUrls, setHasUrls] = useState(false);
+    const [urls, setUrls] = useState([]);
     
     const [description, setDescription] = useState([]);
 
@@ -36,7 +40,7 @@ export default function Monument() {
     const [selfCoordinates, setSelfCoordinates] = useState([]);
     const [MCoordinates, setMCoordinates] = useState([]);
     const route = useRoute();
-    const { monument, city, url, country } = route.params;
+    const { monument, city, country, url, prevUrls } = route.params;
 
     const [listName, setListName] = useState('');
     const [myLists, setMyLists] = useState([]);
@@ -188,6 +192,9 @@ export default function Monument() {
             
     useEffect(() => {
         //monument === undefined ? monument = "Torre Eiffel" : monument = monument; 
+        let url_;
+        url === undefined ? url_ = false : url_ = true;
+        setHasUrls(url_);
         const fetchData = async (monument) => {
             try {
                 const data = await fetchMonumentDescription(monument);
@@ -197,9 +204,10 @@ export default function Monument() {
             }
         }
 
-        const fetchCoordinatesC = async (monument) => {
+        const fetchCoordinatesC = async () => {
             try {
                 const coordsC = await fetchCoordinates(city);
+
                 setCoordinatesC(coordsC);
             } catch (error) {
                 console.error('Error fetching the coordinates:', error);
@@ -208,7 +216,7 @@ export default function Monument() {
 
         const fetchCoordinatesM = async (monument) => {
             try {
-                const coordsM = await fetchCoordinates(monument + ", " + city);
+                const coordsM = await fetchCoordinates(monument + " " + city);
                 setMCoordinates(coordsM);
             } catch (error) {
                 console.error('Error fetching the coordinates:', error);
@@ -231,6 +239,21 @@ export default function Monument() {
             }
         }
 
+        const fetchImagesMon = async (monument) => {
+            try {
+                const data = await fetchImagesUnsplash(monument);
+                console.log('URLS IMAGES:', data);
+                setUrls(data);
+                setHasUrls(true);
+                return data;
+
+            } catch (error) {
+                console.error('Error fetching monument images:', error);
+                setHasUrls(false);
+                return [];
+            }
+        }
+
         const getUserID = async () => {
             const id = await AsyncStorage.getItem('userID');
             if (!id) {
@@ -247,10 +270,24 @@ export default function Monument() {
         fetchCoordinatesM(monument);        
         getUserID();
         getLists();
+        if (url_ === false) {
+            fetchImagesMon(monument);
+        }
+        else {
+            setUrls(url);
+        }
     }, [url])
 
     if (!fontsLoaded) {
         return <AppLoading />;
+    }
+
+    const onPress = () => {
+        navigation.navigate('city', {
+            city: city,
+            country: country,
+            url: prevUrls,
+        });
     }
 
     return (
@@ -259,11 +296,19 @@ export default function Monument() {
             showsVerticalScrollIndicator={true}
             contentContainerStyle={styles.scrollContainer}>
             <View style={styles.main}>
-                <ImageBackground
-                    source={{ uri: url[7] }}
-                    style={styles.mainImg}>
-                    <BackButton style={styles.backButtonOverlay} />
-                </ImageBackground>
+                {hasUrls === true ? (
+                    <ImageBackground
+                        source={{ uri: urls[7] }}
+                        style={styles.mainImg}>
+                        <BackButton
+                            style={styles.backButtonOverlay}
+                            onPress={onPress} />
+                    </ImageBackground>
+                ) : (
+                    <Text style={styles.description}>
+                        No images to display
+                    </Text>
+                )}
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                 {monument ?
@@ -284,7 +329,7 @@ export default function Monument() {
             <Text style={styles.description}>
                 {description}
             </Text>
-            {coordinatesC.length > 0 ? (
+            {/* {coordinatesC !== null && coordinatesC.length > 0 ? (
                 <MapView
                     style={{ width: '100%', height: screenHeight * 0.4 }}
                     initialRegion={{
@@ -294,7 +339,7 @@ export default function Monument() {
                         longitudeDelta: 0.0421,
                     }}
                 >
-                    {MCoordinates.length > 0 && (
+                    {(MCoordinates !== null && MCoordinates.length > 0) &&  (
                         <Marker
                             coordinate={{
                                 latitude: MCoordinates[0],
@@ -303,23 +348,30 @@ export default function Monument() {
                             title={monument}
                             description={description}
                         />
-                    )}
+                    )
+                    // :(
+                    //     <Text style={styles.description}>
+                    //         Coordinates not found for the monument.
+                    //     </Text>
+                    // )
+                
+                }
                     {selfCoordinates.length > 0 && (
                         <Marker
                             coordinate={{
                                 latitude: selfCoordinates[0],
                                 longitude: selfCoordinates[1],
                             }}
-                            title="Você está aqui"
+                            title="You are here"
                         />
                     )}
                 </MapView>
 
-            ):(
+            ) : (
                 <Text style={styles.description}>
                     Loading map...
                 </Text>)
-            }
+            } */}
 
 
             {isSidebarOpen && (

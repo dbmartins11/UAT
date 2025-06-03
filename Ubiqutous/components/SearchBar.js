@@ -1,42 +1,41 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
-export default function SearchBar({ onSearch }) {
-    const [searchText, setSearchText] = useState('');
-
-    const handleChange = (text) => {
-        setSearchText(text);
-        if (onSearch) {
-            onSearch(text);
-        }
-    };
+export default function SearchBar() {
+    const router = useRouter();
 
     return (
-        <View style={styles.bar}
-        >
+        <View style={styles.bar}>
             <Ionicons name="search" size={20} color="#333333" style={{ marginRight: 10 }} />
-            <TextInput
-                placeholder="Search a country, city or monument"
-                placeholderTextColor="#000"
-                value={searchText}
-                onChangeText={handleChange}
+            <TouchableOpacity
+                style={styles.button}
+                onPress={() => router.push('/(tabs)/Search')}
             >
-            </TextInput>
+                <Text>Search for a city, country or monument</Text>
+            </TouchableOpacity>
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     bar: {
         display: 'flex',
         flexDirection: 'row',
         width: '80%',
-        height: 45,
-        padding: '3%',
+        height: 50,
+        paddingHorizontal: '3%',
         margin: '7%',
         alignSelf: 'center',
+        alignItems: 'center',
         borderRadius: 10,
         backgroundColor: '#DEEFFA',
+        color: '#000',
     },
+    button: {
+        height: '100vh',
+        width: '100vw',
+        backgroundColor: 'none',
+        color: '#000',
+    }
 });

@@ -10,12 +10,17 @@ export const fetchImagesUnsplash = async (city) => {
             }
         });
 
-        //console.log('URL: ' + url);
+        console.log('URL: ' + url);
 
-        const data = await response.json();
-        const urls = data.results.map(res => res.urls.small);
-        //console.log('URLs:', urls[1]);
-        return urls;
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            const urls = data.results.map(res => res.urls.small);
+            return urls;
+        } catch (jsonError) {
+            console.error('Unsplash response is not JSON:', text);
+            return [];
+        }
     } catch (error) {
         console.error('Error fetching images Unsplash:', error);
         return null;

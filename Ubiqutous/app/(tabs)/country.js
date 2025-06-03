@@ -15,12 +15,16 @@ import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion} from '
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
+import { use } from 'react';
 
 export default function Country() {
     const navigation = useNavigation();
     const route = useRoute();
     const { country, urls } = route.params;
 
+    const [getUrls, setUrls] = useState(urls || []);
+    const [getNames, setGetNames] = useState(false);
     const [images, setImages] = useState([]);
     const [imagesReady, setImagesReady] = useState(false);
     const [cities, setCities] = useState([]);
@@ -71,14 +75,16 @@ export default function Country() {
 
     useEffect(() => {
         setImagesReady(false);
+        setGetNames(false);
         setCitiesImg([]);
         setCities([]);
         setImages([]);
+        setUrls(urls || []);
 
         const getCountryImages = () => {
             const indImgs = [];
             while (indImgs.length < 4) {
-                const randomIndex = Math.floor(Math.random() * urls.length);
+                const randomIndex = Math.floor(Math.random() * getUrls.length);
 
                 if (!indImgs.includes(randomIndex)) {
                     indImgs.push(randomIndex);
@@ -92,6 +98,7 @@ export default function Country() {
             try {
                 dataNames = await fetchCities(country + "+all");
                 setCities(dataNames);
+                setGetNames(true);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
@@ -108,13 +115,32 @@ export default function Country() {
             }
         }
 
+        const fetchCoutryImages = async (country) => {
+            try {
+                const data = await fetchImagesUnsplash(country + " landmarks and tourism");
+                setUrls(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        if (urls === undefined) {
+            fetchCoutryImages(country);
+        }
+        fetchData(country);
+        getCountryImages();
+
+    }, [urls]);
+
+
+    useEffect(() => {
         const preloadImages = async (urls) => {
             const cacheImages = urls.map((url) => Image.prefetch(url));
             await Promise.all(cacheImages);
         }
 
         const LoadImages = async () => {
-            await preloadImages(urls);
+            await preloadImages(getUrls);
             //await preloadImages(citiesUrls);
             setImagesReady(true);
         }
@@ -127,11 +153,11 @@ export default function Country() {
 
         getUserID();
         getLists();
-        fetchData(country);
-        getCountryImages();
-        LoadImages();
+        if (getNames) {
+            LoadImages();
+        }
 
-    }, [urls])
+    }, [getNames]);
 
     if (!fontsLoaded) {
         return <AppLoading />;
@@ -191,37 +217,40 @@ export default function Country() {
         }
     };    
         
+
     return (
         <View style={{ flex: 1, padding: 10 }}>
             {imagesReady ? (
                 <View>
-                    <BackButton></BackButton>
+                    <BackButton
+                        onPress={() => navigation.goBack()}
+                    ></BackButton>
                     <View style={styles.imgBlock}>
-                        {urls[images[0]] && (
+                        {getUrls[images[0]] && (
                             <Image
-                                source={{ uri: urls[images[0]] }}
+                                source={{ uri: getUrls[images[0]] }}
                                 style={styles.firstImg}
                             />
                         )}
 
                         <View style={styles.imgBlock_1}>
-                            {urls[images[1]] && (
+                            {getUrls[images[1]] && (
                                 <Image
-                                    source={{ uri: urls[images[1]] }}
+                                    source={{ uri: getUrls[images[1]] }}
                                     style={styles.secondImg}
                                 />
                             )}
 
                             <View style={styles.imgBlock_2}>
-                                {urls[images[2]] && (
+                                {getUrls[images[2]] && (
                                     <Image
-                                        source={{ uri: urls[images[2]] }}
+                                        source={{ uri: getUrls[images[2]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
-                                {urls[images[3]] && (
+                                {getUrls[images[3]] && (
                                     <Image
-                                        source={{ uri: urls[images[3]] }}
+                                        source={{ uri: getUrls[images[3]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
@@ -257,6 +286,7 @@ export default function Country() {
                                         city: city,
                                         urls: citiesImg[index],
                                         country: country,
+                                        prevUrls: urls,
                                     })}>
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
                                         <Text style={{
@@ -292,7 +322,7 @@ export default function Country() {
             ) :
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={{ fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
-                        Loading  
+                        Loading
                     </Text>
                     <ActivityIndicator
                         size="large"

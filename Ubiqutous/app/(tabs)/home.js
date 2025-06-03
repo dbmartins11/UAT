@@ -13,7 +13,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Home() {
     const navigation = useNavigation();
-    const [searchText, setSearchText] = useState('');
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
         OpenSans_400Regular,
@@ -67,10 +66,6 @@ export default function Home() {
 
     }, [])
 
-    const handleSearch = (text) => {
-        setSearchText(text);
-    }
-
     if (!fontsLoaded) {
         return <AppLoading />;
     }
@@ -88,8 +83,7 @@ export default function Home() {
                         style={styles.icon} />
                 </ImageBackground>
             </View>
-            <SearchBar
-                onSearch={handleSearch} />
+            <SearchBar/>
             <Text style={styles.title}>Our Suggestions</Text>
             <ScrollView
                 horizontal={true}

@@ -3,12 +3,12 @@ import { TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
-export default function BackButton({ style }) {
+export default function BackButton({ style, onPress }) {
     const navigation = useNavigation();
 
     return (
         <TouchableOpacity
-            onPress={() => navigation.goBack()}
+            onPress={onPress ? onPress : () => navigation.goBack()}
             style={styles.button}>
             <Image
                 source={require('../assets/icons/BackButton.png')}

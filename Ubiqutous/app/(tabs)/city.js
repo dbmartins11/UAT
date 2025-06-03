@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
 import { CrimsonText_400Regular } from '@expo-google-fonts/crimson-text';
 import AppLoading from 'expo-app-loading';
+import { useFocusEffect } from '@react-navigation/native';
 import { useRoute } from '@react-navigation/native';
 import { fetchMonuments } from '../../api/serpApi.js';
+import { fetchMonumentsWiki } from '../../api/apiWikipedia.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
@@ -14,13 +16,16 @@ import { db } from '../../firebase/firebaseConf';
 import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
+import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 
 export default function City() {
     const navigation = useNavigation();
     const route = useRoute();
-    const { city, urls, country } = route.params;
+    const { city, urls, country, prevUrls } = route.params;
 
+    const [url, setUrl] = useState(urls || []);
     const [images, setImages] = useState([]);
+    const [getNames, setGetNames] = useState(false);
     const [imagesReady, setImagesReady] = useState(false);
     const [monuments, setMonuments] = useState([]);
     const [monumentsImg, setMonumentsImg] = useState([]);
@@ -69,22 +74,25 @@ export default function City() {
         }
     };
 
-    useEffect(() => {
-        setImagesReady(false);
-        setMonumentsImg([]);
-        setMonuments([]);
-        setImages([]);
+    useFocusEffect(
+        useCallback(() => {
+            setImagesReady(false);
+            setGetNames(false);
+            setMonumentsImg([]);
+            setMonuments([]);
+            setImages([]);
+            setUrl(urls || []);
 
-        const getCountryImages = () => {
-            const indImgs = [];
-            while (indImgs.length < 4) {
-                const randomIndex = Math.floor(Math.random() * urls.length);
-                if (!indImgs.includes(randomIndex)) {
-                    indImgs.push(randomIndex);
+            const getCountryImages = () => {
+                const indImgs = [];
+                while (indImgs.length < 4) {
+                    const randomIndex = Math.floor(Math.random() * url.length);
+                    if (!indImgs.includes(randomIndex)) {
+                        indImgs.push(randomIndex);
+                    }
                 }
-            }
-            setImages(indImgs);
-        };
+                setImages(indImgs);
+            };
 
         const fetchData = async (city) => {
             let dataNames = [];
@@ -115,26 +123,43 @@ export default function City() {
 
         getUserID();
         getLists();
-        fetchData(city);
-        getCountryImages();
+            fetchData(city);
+            getCountryImages();
 
+        }, [city, urls])
+    );
+
+
+    useEffect(() => {
         const preloadImages = async (urls) => {
             const cacheImages = urls.map((url) => Image.prefetch(url));
             await Promise.all(cacheImages);
         }
 
         const LoadImages = async () => {
-            await preloadImages(urls);
+            await preloadImages(url);
+            //await preloadImages(citiesUrls);
             setImagesReady(true);
         }
 
-        LoadImages();
+        if (getNames) {
+            LoadImages();
+        }
 
-    }, [urls])
+    }, [getNames]);
+
 
     if (!fontsLoaded) {
         return <AppLoading />;
     }
+
+    const onPress = () => {
+        navigation.navigate('country', {
+            country: country,
+            //urls: prevUrls
+        });
+    }
+
 
 
     const createList = async () => {
@@ -215,33 +240,35 @@ export default function City() {
         <View style={{ flex: 1, padding: 10 }}>
             {imagesReady ? (
                 <View>
-                    <BackButton />
+                    <BackButton
+                        onPress={onPress}
+                    > </BackButton>
                     <View style={styles.imgBlock}>
-                        {urls[images[0]] && (
+                        {url[images[0]] && (
                             <Image
-                                source={{ uri: urls[images[0]] }}
+                                source={{ uri: url[images[0]] }}
                                 style={styles.firstImg}
                             />
                         )}
 
                         <View style={styles.imgBlock_1}>
-                            {urls[images[1]] && (
+                            {url[images[1]] && (
                                 <Image
-                                    source={{ uri: urls[images[1]] }}
+                                    source={{ uri: url[images[1]] }}
                                     style={styles.secondImg}
                                 />
                             )}
 
                             <View style={styles.imgBlock_2}>
-                                {urls[images[2]] && (
+                                {url[images[2]] && (
                                     <Image
-                                        source={{ uri: urls[images[2]] }}
+                                        source={{ uri: url[images[2]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
-                                {urls[images[3]] && (
+                                {url[images[3]] && (
                                     <Image
-                                        source={{ uri: urls[images[3]] }}
+                                        source={{ uri: url[images[3]] }}
                                         style={styles.thirdImg}
                                     />
                                 )}
@@ -276,8 +303,10 @@ export default function City() {
                                     onPress={() => navigation.navigate('monument', {
                                         monument: monument,
                                         city: city,
+                                        country: country,
                                         url: monumentsImg[index],
                                         country: country,
+                                        prevUrls: urls,
                                     })}
                                 >
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
@@ -307,7 +336,7 @@ export default function City() {
                                 </TouchableOpacity>
                             ))
                         ) : (
-                            <Text style={styles.title}>Loading...</Text>
+                            <Text style={styles.title}>No Monuments Found</Text>
                         )}
                     </ScrollView>
                 </View>
@@ -494,7 +523,7 @@ const styles = StyleSheet.create({
 
     scrollContainer: {
         flexGrow: 1,
-        paddingBottom: '20%',
+        paddingBottom: '80%',
     },
 
 });
