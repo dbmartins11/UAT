@@ -19,7 +19,6 @@ import { doc, getDoc, setDoc, collection, updateDoc, arrayUnion} from 'firebase/
 import { TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, auth } from '../../firebase/firebaseConf';
-import * as Notifications from "expo-notifications";
 import { getDocs } from 'firebase/firestore'; // Add this import at the top if not present
 import { use } from 'react';
 
@@ -50,13 +49,6 @@ export default function Monument() {
     const sidebarRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
 
-    Notifications.setNotificationHandler({
-        handleNotification: async () => ({
-            shouldShowAlert: true,
-            shouldPlaySound: true,
-            shouldSetBadge: true,
-        }),
-    });
    
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -102,19 +94,6 @@ export default function Monument() {
                     }
                 }
             });
-
-            const generateNotification = async () => {
-                //show the notification to the user
-                Notifications.scheduleNotificationAsync({
-                    //set the content of the notification
-                    content: {
-                    title: "List Created",
-                    body: "Added " + monument + " to " + listName,
-                    },
-                    trigger: null,
-                });
-            };
-
             console.log("List created successfully:", listName);
             setModalVisible(false);            
             getLists();
