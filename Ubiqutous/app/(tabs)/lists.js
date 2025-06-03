@@ -95,7 +95,7 @@ export default function ListScreen() {
     }
   };
 
-const handleToggleCountryVisited = async (country) => {
+  const handleToggleCountryVisited = async (country) => {
     try {
       const listRef = doc(db, 'users', userID, 'lists', listName);
       const updatedCountries = { ...listContent.countries };
@@ -171,7 +171,7 @@ const handleToggleCountryVisited = async (country) => {
       const listRef = doc(db, 'users', userID, 'lists', listName);
       const updatedCountries = { ...listContent.countries };
       if (updatedCountries[country] && updatedCountries[country].cities[city]) {
-        updatedCountries[country].cities[city].monuments = 
+        updatedCountries[country].cities[city].monuments =
           updatedCountries[country].cities[city].monuments.filter(m => m.name !== monument.name);
         await updateDoc(listRef, { countries: updatedCountries });
         fetchListData();
@@ -181,7 +181,7 @@ const handleToggleCountryVisited = async (country) => {
     }
   };
 
-    const confirmDelete = () => {
+  const confirmDelete = () => {
     if (deleteType === 'list') {
       handleDeleteList();
     } else if (deleteType === 'country') {
@@ -204,7 +204,9 @@ const handleToggleCountryVisited = async (country) => {
 
   return (
     <ScrollView style={styles.container}>
-      <BackButton></BackButton>
+      <BackButton
+        onPress={() => navigation.navigate('profile')}
+      ></BackButton>
       <Text style={styles.sectionTitle}>List: {listName}</Text>
 
       {listContent ? (
@@ -225,9 +227,9 @@ const handleToggleCountryVisited = async (country) => {
                   onPress={() => openDeleteModal('country', { country })}
                 >
                   <Image
-                                    source={require('../../assets/icons/close.png')}
-                                    style={{ width: 14, height: 14, marginLeft: 20, marginTop: 4 }}>
-                                  </Image>
+                    source={require('../../assets/icons/close.png')}
+                    style={{ width: 14, height: 14, marginLeft: 20, marginTop: 4 }}>
+                  </Image>
                 </TouchableOpacity>
               </View>
               {
@@ -250,9 +252,9 @@ const handleToggleCountryVisited = async (country) => {
                           onPress={() => openDeleteModal('city', { country, city })}
                         >
                           <Image
-                                    source={require('../../assets/icons/close.png')}
-                                    style={{ width: 12, height: 12, marginLeft: 20, marginTop: 2 }}>
-                                  </Image>
+                            source={require('../../assets/icons/close.png')}
+                            style={{ width: 12, height: 12, marginLeft: 20, marginTop: 2 }}>
+                          </Image>
                         </TouchableOpacity>
                       </View>
                       <View style={styles.monumentContainer}>
@@ -318,10 +320,10 @@ const handleToggleCountryVisited = async (country) => {
             <Text style={styles.modalTitle}>Confirm Deletion</Text>
             <Text style={styles.modalText}>
               Are you sure you want to delete{' '}
-              {deleteType === 'list' ? 'this list' : 
-               deleteType === 'country' ? `the country "${deleteTarget.country}"` :
-               deleteType === 'city' ? `the city "${deleteTarget.city}"` :
-               `the monument "${deleteTarget.monument?.name || 'Unnamed Monument'}"`}?
+              {deleteType === 'list' ? 'this list' :
+                deleteType === 'country' ? `the country "${deleteTarget.country}"` :
+                  deleteType === 'city' ? `the city "${deleteTarget.city}"` :
+                    `the monument "${deleteTarget.monument?.name || 'Unnamed Monument'}"`}?
             </Text>
             <View style={styles.modalButtonContainer}>
               <Pressable
