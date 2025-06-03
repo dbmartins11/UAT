@@ -120,7 +120,7 @@ export default function City() {
     const onPress = () => {
         navigation.navigate('country', {
             country: country,
-            urls: prevUrls
+            //urls: prevUrls
         });
     }
 

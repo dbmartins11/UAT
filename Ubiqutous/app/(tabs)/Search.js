@@ -3,8 +3,11 @@ import { useFocusEffect } from '@react-navigation/native';
 import { View, TextInput, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { fetchSearch } from '../../api/apiNominatim';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from 'expo-router';
 
-export default function SearchScreen({ navigation }) {
+export default function SearchScreen() {
+  const navigation = useNavigation();
+
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [searched, setSearched] = useState(false);
@@ -55,8 +58,33 @@ export default function SearchScreen({ navigation }) {
     console.log('-------------------------');
     console.log('Selecionado:', item);
     console.log('-------------------------');
-    // Podes agora decidir para onde navegas:
-    // Por exemplo: navigation.navigate('city', { city: item.display_name });
+
+    if (item.addresstype === 'man_made' || item.addresstype === 'tourism') {
+      navigation.navigate('monument', {
+        monument: item.name,
+        city: item.address?.county || item.address?.city,
+      });
+    }
+
+    else if (item.addresstype === 'country') {
+      navigation.navigate('country', {
+        country: item.name,
+      });
+    }
+    
+    else if (item.addresstype === 'county' || item.addresstype === 'city') {
+      navigation.navigate('city', {
+        city: item.name,
+        country: item.address?.country,
+      });
+    }
+    
+    else {
+      navigation.navigate('city', {
+        city: item.name,
+        country: item.address?.country,
+      });
+    }
   };
 
   return (
@@ -70,7 +98,7 @@ export default function SearchScreen({ navigation }) {
           onChangeText={setQuery}
         />
       </View>
-
+ 
       {loading && <Text style={styles.loading}>Loading Suggestions</Text>}
 
       <FlatList

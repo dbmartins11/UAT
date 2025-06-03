@@ -7,6 +7,7 @@ import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchMonumentDescription } from '../../api/apiWikipedia.js';
 import { fetchCoordinates } from '../../api/apiNominatim.js';
+import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 import MapView, { Marker } from 'react-native-maps';
@@ -22,6 +23,7 @@ export default function Monument() {
         CrimsonText_400Regular,
     });
     const [hasUrls, setHasUrls] = useState(false);
+    const [urls, setUrls] = useState([]);
     const [description, setDescription] = useState([]);
     const [coordinatesC, setCoordinatesC] = useState([]);
     const [selfCoordinates, setSelfCoordinates] = useState([]);
@@ -78,10 +80,31 @@ export default function Monument() {
             }
         }
 
+        const fetchImagesMon = async (monument) => {
+            try {
+                const data = await fetchImagesUnsplash(monument);
+                console.log('URLS IMAGES:', data);
+                setUrls(data);
+                setHasUrls(true);
+                return data;
+
+            } catch (error) {
+                console.error('Error fetching monument images:', error);
+                setHasUrls(false);
+                return [];
+            }
+        }
+
         fetchData(monument);
         getLocation();
         fetchCoordinatesC(monument);
         fetchCoordinatesM(monument);
+        if (url_ === false) {
+            fetchImagesMon(monument);
+        }
+        else {
+            setUrls(url);
+        }
     }, [url])
 
     if (!fontsLoaded) {
@@ -104,7 +127,7 @@ export default function Monument() {
             <View style={styles.main}>
                 {hasUrls === true ? (
                     <ImageBackground
-                        source={{ uri: url[7] }}
+                        source={{ uri: urls[7] }}
                         style={styles.mainImg}>
                         <BackButton
                             style={styles.backButtonOverlay}
@@ -119,7 +142,7 @@ export default function Monument() {
             <Text style={styles.description}>
                 {description}
             </Text>
-            {coordinatesC !== null && coordinatesC.length > 0 ? (
+            {/* {coordinatesC !== null && coordinatesC.length > 0 ? (
                 <MapView
                     style={{ width: '100%', height: screenHeight * 0.4 }}
                     initialRegion={{
@@ -152,7 +175,7 @@ export default function Monument() {
                                 latitude: selfCoordinates[0],
                                 longitude: selfCoordinates[1],
                             }}
-                            title="Você está aqui"
+                            title="You are here"
                         />
                     )}
                 </MapView>
@@ -161,7 +184,7 @@ export default function Monument() {
                 <Text style={styles.description}>
                     Loading map...
                 </Text>)
-            }
+            } */}
         </ScrollView>
     )
 }

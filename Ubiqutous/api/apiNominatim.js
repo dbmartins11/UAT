@@ -32,10 +32,10 @@ export const fetchSearch = async (query) => {
     });
     const data = await res.json();
     const filtered = data.filter(item =>
-      ['place', 'boundary', 'country', 'tourism', 'man_made'].includes(item.addresstype)
+      ['city', 'tourism', 'man_made', 'country'].includes(item.addresstype)
     );
 
-    //return filtered;
+    //return data;
     return filtered;
 
   } catch (error) {
