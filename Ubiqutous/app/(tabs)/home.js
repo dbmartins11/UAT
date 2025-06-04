@@ -10,8 +10,15 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { auth } from '../../firebase/firebaseConf.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { useTheme } from '../../components/ThemeContext';
+
+
 
 export default function Home() {
+
+    const { darkMode } = useTheme();
+
+
     const navigation = useNavigation();
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
@@ -71,7 +78,7 @@ export default function Home() {
     }
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#fff' }}>
+        <View style={{ flex: 1, backgroundColor: darkMode ? '#000' : '#fff' }}>
             <View style={styles.homeImage}>
                 <ImageBackground
                     source={require('../../assets/images/HomePicture.png')}
@@ -84,7 +91,7 @@ export default function Home() {
                 </ImageBackground>
             </View>
             <SearchBar/>
-            <Text style={styles.title}>Our Suggestions</Text>
+            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Our Suggestions</Text>
             <ScrollView
                 horizontal={true}
                 //showsHorizontalScrollIndicator={false}
@@ -105,11 +112,14 @@ export default function Home() {
                                         source={{ uri: urls[index][1] }}
                                         style={styles.countryImg} />
                                     <Text style={{ padding: '5%' }}>{country}</Text>
+
+
                                 </TouchableOpacity >
                             )
                         })
                         :
-                        <Text style={{ padding: '5%' }}>Loading...</Text>
+                        <Text style={{ padding: '5%', color: darkMode ? '#fff' : '#000' }}>Loading...</Text>
+
                 }
 
             </ScrollView>

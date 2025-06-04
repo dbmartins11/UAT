@@ -18,7 +18,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 
+import { useTheme } from '../../components/ThemeContext';
+
+
+
+
 export default function City() {
+
+    const { darkMode } = useTheme();
+    const textColor = { color: darkMode ? 'white' : 'black' };
+
+
     const navigation = useNavigation();
     const route = useRoute();
     const { city, urls, country, prevUrls } = route.params;
@@ -237,7 +247,12 @@ export default function City() {
     };    
         
     return (
-        <View style={{ flex: 1, padding: 10 }}>
+        <View style={{ 
+                flex: 1, 
+                padding: 10, 
+                backgroundColor: darkMode ? '#000' : '#fff' 
+            }}>
+
             {imagesReady ? (
                 <View>
                     <BackButton
@@ -277,7 +292,7 @@ export default function City() {
                     </View>            
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                         {city ?
-                            <Text style={styles.title}>{city}</Text>
+                            <Text style={[styles.title, textColor]}>{city}</Text>
                             :
                             <Text style={styles.title}>Undefined</Text>
                         }
@@ -310,14 +325,15 @@ export default function City() {
                                     })}
                                 >
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
-                                        <Text style={{
-                                            fontFamily: 'OpenSans_400Regular',
-                                            fontSize: 17,
-                                            fontWeight: 'bold',
-                                            textTransform: 'uppercase',
-                                        }}>
-                                            {monument}
+                                        <Text style={[{
+                                                fontFamily: 'OpenSans_400Regular',
+                                                fontSize: 17,
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase',
+                                            }, textColor]}>
+                                                {monument}
                                         </Text>
+
                                     </View>
                                     <View style={{ flexDirection: 'row', width: '70%', marginHorizontal: 'auto' }}>
                                         <Image
@@ -336,7 +352,7 @@ export default function City() {
                                 </TouchableOpacity>
                             ))
                         ) : (
-                            <Text style={styles.title}>No Monuments Found</Text>
+                            <Text style={[styles.title, textColor]}>No Monuments Found</Text>
                         )}
                     </ScrollView>
                 </View>
@@ -407,7 +423,7 @@ export default function City() {
                                                             alignItems: 'center',
                                                             width: 250
                                                         }}>
-                                                            <Text style={{ fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
+                                                            <Text style={[{ fontSize: 18, marginBottom: 20 }, textColor]}>Create a new list?</Text>
                                                                 <View>
                                                                         <TextInput
                                                                             placeholder="List Name"
@@ -436,7 +452,7 @@ export default function City() {
             
                                                                 <TouchableOpacity style={{backgroundColor: '#ccc', paddingVertical: 10,paddingHorizontal: 20,borderRadius: 8,}}
                                                                     onPress={() => setModalVisible(false)}>
-                                                                    <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
+                                                                    <Text style={[{ fontWeight: 'bold' }, textColor]}>Cancel</Text>
                                                                 </TouchableOpacity>
             
             
@@ -444,7 +460,10 @@ export default function City() {
                                                         </View>
                                                     </View>
                                                 </Modal>
-                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                                <Text style={[{ color: '#fff', fontWeight: 'bold' }, textColor]}>
+                                                    Create New List
+                                                </Text>
+
                                             </TouchableOpacity>
                                         </View>
                                     </TouchableWithoutFeedback>

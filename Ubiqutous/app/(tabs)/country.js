@@ -18,7 +18,14 @@ import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 import { use } from 'react';
 
+import { useTheme } from '../../components/ThemeContext';
+
+
+
 export default function Country() {
+
+    const { darkMode } = useTheme();
+    
     const navigation = useNavigation();
     const route = useRoute();
     const { country, urls } = route.params;
@@ -219,7 +226,7 @@ export default function Country() {
         
 
     return (
-        <View style={{ flex: 1, padding: 10 }}>
+        <View style={{ flex: 1, padding: 10, backgroundColor: darkMode ? '#000' : '#fff' }}>
             {imagesReady ? (
                 <View>
                     <BackButton
@@ -259,9 +266,9 @@ export default function Country() {
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                         {country ?
-                            <Text style={styles.title}>{country}</Text>
+                           <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{country}</Text>
                             :
-                            <Text style={styles.title}>Undefined</Text>
+                            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                         }
                         <TouchableOpacity
                             style={{ marginLeft: 20, borderRadius: 25, }}
@@ -290,10 +297,11 @@ export default function Country() {
                                     })}>
                                     <View style={{ width: '30%', justifyContent: 'center' }}>
                                         <Text style={{
-                                            fontFamily: 'OpenSans_400Regular',
-                                            fontSize: 17,
-                                            fontWeight: 'bold',
-                                            textTransform: 'uppercase',
+                                                fontFamily: 'OpenSans_400Regular',
+                                                fontSize: 17,
+                                                fontWeight: 'bold',
+                                                textTransform: 'uppercase',
+                                                color: darkMode ? '#fff' : '#000'
                                         }}>
                                             {city}
                                         </Text>
@@ -315,7 +323,7 @@ export default function Country() {
                                 </TouchableOpacity>
                             ))
                         ) : (
-                            <Text style={styles.title}>Loading...</Text>
+                            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Loading...</Text>
                         )}
                     </ScrollView>
                 </View>
@@ -333,7 +341,7 @@ export default function Country() {
             
             {isSidebarOpen && (
                         <TouchableWithoutFeedback onPress={handleBackdropPress}>
-                            <View style={{position: 'absolute',top: 0,left: 0,right: 0,bottom: 0,backgroundColor: 'rgba(0,0,0,0.5)',justifyContent: 'flex-end',zIndex: 10}}>
+                            <View style={{position: 'absolute',top: 0,left: 0,right: 0,bottom: 0,backgroundColor: darkMode ? '#111' : '#fff',justifyContent: 'flex-end',zIndex: 10}}>
                                 <TouchableWithoutFeedback>
                                     <View
                                         ref={sidebarRef}
@@ -350,7 +358,7 @@ export default function Country() {
                                             myLists.map((list, idx) => (
                                                 <TouchableOpacity
                                                     key={idx}
-                                                    style={{ marginBottom: 10, padding: 10, backgroundColor: '#eee', borderRadius: 8 }}
+                                                    style={{ marginBottom: 10, padding: 10, backgroundColor: darkMode ? '#333' : '#ccc', borderRadius: 8 }}
                                                     onPress={() => updateList(list.name, country)}
                                                 >
                                                     <Text>{list.name || `List ${idx + 1}`}</Text>
@@ -359,7 +367,7 @@ export default function Country() {
                                         )}
                                         <TouchableOpacity
                                             style={{
-                                                backgroundColor: '#000',
+                                                backgroundColor: darkMode ? '#333' : '#ccc',
                                                 padding: 12,
                                                 borderRadius: 8,
                                                 alignItems: 'center',
@@ -404,17 +412,17 @@ export default function Country() {
                                                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                                                                 
                                                             <TouchableOpacity
-                                                                style={{ backgroundColor: '#000',paddingVertical: 10,paddingHorizontal: 20, borderRadius: 8,marginRight: 10,}}
+                                                                style={{ backgroundColor: darkMode ? '#333' : '#ccc',paddingVertical: 10,paddingHorizontal: 20, borderRadius: 8,marginRight: 10,}}
                                                                 onPress={() => {                                                                
                                                                     createList();
                                                                 }}>
-                                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                                <Text style={{ color: darkMode ? '#fff' : '#000' }}>Create</Text>
                                                             </TouchableOpacity>
         
          
-                                                            <TouchableOpacity style={{backgroundColor: '#ccc', paddingVertical: 10,paddingHorizontal: 20,borderRadius: 8,}}
+                                                            <TouchableOpacity style={{backgroundColor: darkMode ? '#333' : '#ccc', paddingVertical: 10,paddingHorizontal: 20,borderRadius: 8,}}
                                                                 onPress={() => setModalVisible(false)}>
-                                                                <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
+                                                                <Text style={{ color: darkMode ? '#fff' : '#000' }}>Cancel</Text>
                                                             </TouchableOpacity>
         
         
@@ -422,7 +430,7 @@ export default function Country() {
                                                     </View>
                                                 </View>
                                             </Modal>
-                                            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                            <Text style={{ color: darkMode ? '#fff' : '#000' }}>Create New List</Text>
                                         </TouchableOpacity>
                                     </View>
                                 </TouchableWithoutFeedback>

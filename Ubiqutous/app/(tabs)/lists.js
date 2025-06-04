@@ -19,7 +19,12 @@ import { useFocusEffect } from '@react-navigation/native';
 
 import { useRoute } from '@react-navigation/native';
 
+import { useTheme } from '../../components/ThemeContext';
+
 export default function ListScreen() {
+  
+  const { darkMode } = useTheme();
+  
   const route = useRoute();
   const { userID, listName } = route.params;
   const [listContent, setListContent] = useState(null); // Use null to indicate no data initially
@@ -203,11 +208,11 @@ export default function ListScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: darkMode ? '#000' : '#fff' }]}>
       <BackButton
         onPress={() => navigation.navigate('profile')}
       ></BackButton>
-      <Text style={styles.sectionTitle}>List: {listName}</Text>
+      <Text style={[styles.sectionTitle, { color: darkMode ? '#fff' : '#000' }]}>List: {listName}</Text>
 
       {listContent ? (
         Object.keys(listContent.countries).length > 0 ? (
@@ -222,7 +227,7 @@ export default function ListScreen() {
                     {countryData.visited ? 'X' : ''}
                   </Text>
                 </TouchableOpacity>
-                <Text style={styles.countryText}>{country}</Text>
+                <Text style={[styles.countryText, { color: darkMode ? '#fff' : '#000' }]}>{country}</Text>
                 <TouchableOpacity
                   onPress={() => openDeleteModal('country', { country })}
                 >
@@ -234,7 +239,7 @@ export default function ListScreen() {
               </View>
               {
                 (!countryData.cities || Object.keys(countryData.cities).length === 0) ? (
-                  <Text style={styles.noDataText}>No cities saved for this country</Text>
+                  <Text style={[styles.noDataText, { color: darkMode ? '#ccc' : '#555' }]}>No cities saved for this country</Text>
                 ) : (
                   Object.entries(countryData.cities).map(([city, cityData]) => (
                     <View key={city} style={styles.cityContainer}>
@@ -247,7 +252,7 @@ export default function ListScreen() {
                             {cityData.visited ? 'X' : ''}
                           </Text>
                         </TouchableOpacity>
-                        <Text style={styles.cityText}>{city}</Text>
+                        <Text style={[styles.cityText, { color: darkMode ? '#fff' : '#000' }]}>{city}</Text>
                         <TouchableOpacity
                           onPress={() => openDeleteModal('city', { country, city })}
                         >
@@ -260,7 +265,7 @@ export default function ListScreen() {
                       <View style={styles.monumentContainer}>
                         {
                           (!cityData.monuments || cityData.monuments.length === 0) ? (
-                            <Text style={styles.noDataText}>No monuments saved for this city</Text>
+                            <Text style={[styles.noDataText, { color: darkMode ? '#ccc' : '#555' }]}>No monuments saved for this city</Text>
                           ) : (
                             cityData.monuments.map((monument, index) => (
                               <View key={index} style={styles.itemContainer}>
@@ -272,9 +277,7 @@ export default function ListScreen() {
                                     {monument.visited ? 'X' : ''}
                                   </Text>
                                 </TouchableOpacity>
-                                <Text style={styles.monumentText}>
-                                  {monument.name || 'Unnamed Monument'}
-                                </Text>
+                                <Text style={[styles.monumentText, { color: darkMode ? '#fff' : '#000' }]}>{monument.name || 'Unnamed Monument'}</Text>
                                 <TouchableOpacity
                                   onPress={() => openDeleteModal('monument', { country, city, monument })}
                                 >
@@ -295,14 +298,14 @@ export default function ListScreen() {
             </View>
           ))
         ) : (
-          <Text style={styles.noDataText}>No attractions in this list</Text>
+          <Text style={[styles.noDataText, { color: darkMode ? '#ccc' : '#555' }]}>No attractions in this list</Text>
         )
       ) : (
-        <Text style={styles.noDataText}>List not found</Text>
+        <Text style={[styles.noDataText, { color: darkMode ? '#ccc' : '#555' }]}>List not found</Text>
       )}
 
       <TouchableOpacity style={styles.deleteButton} onPress={() => openDeleteModal('list', {})}>
-        <Text style={styles.deleteButtonText}>Delete List</Text>
+        <Text style={[styles.deleteButtonText, { color: 'white' }]}>Delete List</Text>
       </TouchableOpacity>
 
       <Modal
@@ -316,9 +319,9 @@ export default function ListScreen() {
         }}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Confirm Deletion</Text>
-            <Text style={styles.modalText}>
+          <View style={[styles.modalContent, { color: darkMode ? '#fff' : '#000' }]}>
+            <Text style={[styles.modalTitle, { color: darkMode ? '#fff' : '#000' }]}>Confirm Deletion</Text>
+            <Text style={[styles.modalText, { color: darkMode ? '#fff' : '#000' }]}>
               Are you sure you want to delete{' '}
               {deleteType === 'list' ? 'this list' :
                 deleteType === 'country' ? `the country "${deleteTarget.country}"` :
@@ -334,13 +337,13 @@ export default function ListScreen() {
                   setDeleteTarget({});
                 }}
               >
-                <Text style={styles.modalButtonText}>Cancel</Text>
+                <Text style={[styles.modalButtonText, { color: 'white' }]}>Cancel</Text>
               </Pressable>
               <Pressable
                 style={[styles.modalButton, styles.confirmButton]}
                 onPress={confirmDelete}
               >
-                <Text style={styles.modalButtonText}>Delete</Text>
+                <Text style={[styles.modalButtonText, { color: 'white' }]}>Delete</Text>
               </Pressable>
             </View>
           </View>

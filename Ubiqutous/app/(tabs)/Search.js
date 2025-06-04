@@ -4,8 +4,12 @@ import { View, TextInput, Text, FlatList, TouchableOpacity, StyleSheet } from 'r
 import { fetchSearch } from '../../api/apiNominatim';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
+import { useTheme } from '../../components/ThemeContext';
+
 
 export default function SearchScreen() {
+  const { darkMode } = useTheme();
+
   const navigation = useNavigation();
 
   const [query, setQuery] = useState('');
@@ -88,18 +92,21 @@ export default function SearchScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchBox}>
-        <Ionicons name="search" size={20} color="#333333" style={{ marginRight: 10 }} />
+    <View style={[styles.container, { backgroundColor: darkMode ? '#000' : '#fff', flex: 1 }]}>
+      <View style={[styles.searchBox,{ backgroundColor: darkMode ? '#222' : '#DEEFFA' }]}>
+        <Ionicons name="search" size={20} color={darkMode ? '#fff' : '#333'} style={{ marginRight: 10 }} />
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: darkMode ? '#fff' : '#000' }]}
           placeholder="Search for a city, country or monument"
+          placeholderTextColor={darkMode ? '#aaa' : '#666'}
           value={query}
           onChangeText={setQuery}
         />
+
       </View>
  
-      {loading && <Text style={styles.loading}>Loading Suggestions</Text>}
+      {loading && <Text style={[styles.loading, { color: darkMode ? '#ccc' : 'grey' }]}>Loading Suggestions</Text>}
+
 
       <FlatList
         data={suggestions}
@@ -110,7 +117,7 @@ export default function SearchScreen() {
             onPress={() => handleSelectSuggestion(item)}
           >
             {item.name !== undefined && item.address && item.address.country !== undefined && (
-              <Text style={styles.suggestionText}>{item.name}, {item.address.country}</Text>
+              <Text style={[styles.suggestionText, { color: darkMode ? '#fff' : '#000' }]}>{item.name}, {item.address.country}</Text>
             )}
           </TouchableOpacity>
         )}
