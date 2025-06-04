@@ -427,22 +427,6 @@ export default function Monument() {
                                                 width: 250
                                             }}>
                                                 <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Create a new list?</Text>
-<<<<<<< HEAD
-                                                    <View>
-                                                            <TextInput
-                                                                placeholder="List Name"
-                                                                value={listName}
-                                                                onChangeText={setListName}
-                                                                style={{
-                                                                    borderWidth: 1,
-                                                                    borderColor: '#ccc',
-                                                                    borderRadius: 8,
-                                                                    padding: 10,
-                                                                    marginBottom: 10,
-                                                                    width: 150,
-                                                                }}  
-                                                            />
-=======
                                                 <View>
                                                     <TextInput
                                                         placeholder="List Name"
@@ -463,7 +447,6 @@ export default function Monument() {
 
                                                 </View>
                                                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
->>>>>>> 9777145e44e268ffcc915d5f080e8f528b966e37
 
                                                     <TouchableOpacity
                                                         style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
