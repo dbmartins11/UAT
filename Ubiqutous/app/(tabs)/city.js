@@ -13,7 +13,7 @@ import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 
 import { db } from '../../firebase/firebaseConf';
-import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion } from 'firebase/firestore';
+import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
