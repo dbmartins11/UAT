@@ -22,7 +22,7 @@ import { db, auth } from '../../firebase/firebaseConf';
 import { getDocs } from 'firebase/firestore';
 import { use } from 'react';
 import { useNavigation } from 'expo-router';
-import { useTheme } from '../../components/ThemeContext'; 
+import { useTheme } from '../../components/ThemeContext';
 
 
 
@@ -284,9 +284,15 @@ export default function Monument() {
                         source={{ uri: urls[7] }}
                         style={styles.mainImg}>
                         <View style={styles.backButtonCircle}>
-                            <BackButton
-                                style={styles.backButtonOverlay}
-                                onPress={onPress} />
+                            <TouchableOpacity
+                                onPress={onPress ? onPress : () => navigation.goBack()}
+                                style={styles.button}>
+                                <Image
+                                    source={require('../../assets/icons/BackButton.png')}
+                                    style={[styles.icon]}
+                                    resizeMode="contain"
+                                />
+                            </TouchableOpacity>
                         </View>
                     </ImageBackground>
                 ) : (
@@ -409,27 +415,27 @@ export default function Monument() {
                                                 width: 250
                                             }}>
                                                 <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Create a new list?</Text>
-                                                    <View>
-                                                            <TextInput
-                                                                placeholder="List Name"
-                                                                placeholderTextColor={darkMode ? '#999' : '#666'}
-                                                                value={listName}
-                                                                onChangeText={setListName}
-                                                                style={{
-                                                                    borderWidth: 1,
-                                                                    borderColor: '#ccc',
-                                                                    borderRadius: 8,
-                                                                    padding: 10,
-                                                                    marginBottom: 10,
-                                                                    width: 150,
-                                                                    backgroundColor: darkMode ? '#333' : '#fff',
-                                                                    color: darkMode ? '#fff' : '#000'
-                                                                }}  
-                                                            />
+                                                <View>
+                                                    <TextInput
+                                                        placeholder="List Name"
+                                                        placeholderTextColor={darkMode ? '#999' : '#666'}
+                                                        value={listName}
+                                                        onChangeText={setListName}
+                                                        style={{
+                                                            borderWidth: 1,
+                                                            borderColor: '#ccc',
+                                                            borderRadius: 8,
+                                                            padding: 10,
+                                                            marginBottom: 10,
+                                                            width: 150,
+                                                            backgroundColor: darkMode ? '#333' : '#fff',
+                                                            color: darkMode ? '#fff' : '#000'
+                                                        }}
+                                                    />
 
-                                                    </View>
-                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                                                        
+                                                </View>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+
                                                     <TouchableOpacity
                                                         style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
                                                         onPress={() => {
@@ -503,6 +509,13 @@ const styles = StyleSheet.create({
         margin: "7%",
         fontFamily: 'OpenSans_600SemiBold',
         fontSize: 18,
+    },
+
+    icon: {
+        padding: 5,
+        width: 18,
+        height: 18,
+        right: '7%',
     },
 
     scrollContainer: {
