@@ -427,7 +427,7 @@ export default function City() {
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: darkMode ? '#333' : '#fff',
+                                    backgroundColor: darkMode ? '#333' : '#000',
                                     width: '70%',
                                     height: '100%',
                                     position: 'absolute',
@@ -457,47 +457,61 @@ export default function City() {
                                     }}
                                     onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
                                     <Modal
-                                        transparent={true}
-                                        visible={showSuccessModal}
                                         animationType="fade"
-                                        onRequestClose={() => setShowSuccessModal(false)}
-                                        >
+                                        transparent={true}
+                                        visible={modalVisible}
+                                        onRequestClose={() => setModalVisible(false)}
+                                    >
                                         <View style={{
                                             flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
                                             backgroundColor: 'rgba(0,0,0,0.5)',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
                                         }}>
                                             <View style={{
-                                            backgroundColor: darkMode ? '#333' : '#fff',
-                                            padding: 25,
-                                            borderRadius: 12,
-                                            alignItems: 'center',
-                                            width: 250,
+                                                backgroundColor: darkMode ? '#333' : '#000',
+                                                padding: 30,
+                                                borderRadius: 12,
+                                                alignItems: 'center',
+                                                width: 250
                                             }}>
-                                            <Text style={{
-                                                fontSize: 18,
-                                                marginBottom: 20,
-                                                color: darkMode ? '#fff' : '#000',
-                                                textAlign: 'center'
-                                            }}>
-                                                City added successfully!
-                                            </Text>
-                                            <TouchableOpacity
-                                                onPress={() => setShowSuccessModal(false)}
-                                                style={{
-                                                backgroundColor: '#3A5BA0',
-                                                paddingVertical: 10,
-                                                paddingHorizontal: 20,
-                                                borderRadius: 8,
-                                                }}
-                                            >
-                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>OK</Text>
-                                            </TouchableOpacity>
+                                                <Text style={{ color: darkMode ? '#fff' : '#fff', fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
+                                                <View>
+                                                    <TextInput
+                                                        placeholder="List Name"
+                                                        value={listName}
+                                                        onChangeText={setListName}
+                                                        style={{
+                                                            borderWidth: 1,
+                                                            borderColor: '#ccc',
+                                                            borderRadius: 8,
+                                                            padding: 10,
+                                                            marginBottom: 10,
+                                                            width: 150,
+                                                        }}
+                                                    />
+                                                </View>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+
+                                                    <TouchableOpacity
+                                                        style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
+                                                        onPress={() => {
+                                                            createList();
+                                                        }}>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                    </TouchableOpacity>
+
+
+                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
+                                                        onPress={() => setModalVisible(false)}>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Cancel</Text>
+                                                    </TouchableOpacity>
+
+
+                                                </View>
                                             </View>
                                         </View>
-                                        </Modal>
-
+                                    </Modal>
                                     <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>

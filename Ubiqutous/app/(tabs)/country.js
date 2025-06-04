@@ -243,6 +243,7 @@ export default function Country() {
         }
     };
 
+
    
 const updateList = async (listName, city) => {
   try {
@@ -272,7 +273,7 @@ const updateList = async (listName, city) => {
 
 
 
-    return (
+     return (
         <View style={{ flex: 1, padding: 10, backgroundColor: darkMode ? '#000' : '#fff' }}>
             {imagesReady ? (
                 <View>
@@ -423,23 +424,23 @@ const updateList = async (listName, city) => {
                                     }}
                                     onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
                                     <Modal
-                                        transparent={true}
-                                        visible={showSuccessModal}
                                         animationType="fade"
-                                        onRequestClose={() => setShowSuccessModal(false)}
-                                        >
+                                        transparent={true}
+                                        visible={modalVisible}
+                                        onRequestClose={() => setModalVisible(false)}
+                                    >
                                         <View style={{
                                             flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
                                             backgroundColor: 'rgba(0,0,0,0.5)',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
                                         }}>
                                             <View style={{
-                                            backgroundColor: darkMode ? '#333' : '#fff',
-                                            padding: 25,
-                                            borderRadius: 12,
-                                            alignItems: 'center',
-                                            width: 250,
+                                                backgroundColor: darkMode ? '#333' : '#fff',
+                                                padding: 30,
+                                                borderRadius: 12,
+                                                alignItems: 'center',
+                                                width: 250
                                             }}>
                                                 <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#fff' }}>Create a new list?</Text>
                                                 <View>
@@ -479,7 +480,6 @@ const updateList = async (listName, city) => {
                                             </View>
                                         </View>
                                     </Modal>
-
                                     <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>
@@ -489,6 +489,7 @@ const updateList = async (listName, city) => {
             )}
         </View>
     );
+
 }
 
 const styles = StyleSheet.create({

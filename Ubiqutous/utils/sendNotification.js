@@ -1,17 +1,30 @@
-// utils/sendNotification.js
 import * as Notifications from 'expo-notifications';
+import { getCurrentLanguage, translate } from './languageUtils';
 
-export async function sendLocalNotification(destinationName) {
+export const sendLocalNotification = async (itemType) => {
+  const lang = await getCurrentLanguage();
+
+  let messageKey = '';
+  switch (itemType.toLowerCase()) {
+    case 'city':
+      messageKey = 'Cmessage';
+      break;
+    case 'monument':
+      messageKey = 'Mmessage';
+      break;
+    case 'country':
+    default:
+      messageKey = 'CountryMessage';
+      break;
+  }
+
+  const message = translate(messageKey, lang);
+
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Destination added!',
-      body: `${destinationName} added to your list with success`,
-      sound: 'default', // (opcional, mas pode ativar som se configurado)
+      title: translate('success', lang),
+      body: message,
     },
-    trigger: null,
-    // 💡 Para Android, garantir que usa o canal criado no layout
-    android: {
-      channelId: 'default',
-    },
+    trigger: null, 
   });
-}
+};
