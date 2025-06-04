@@ -359,7 +359,7 @@ export default function Monument() {
                         longitudeDelta: 0.0421,
                     }}
                 >
-                    {(MCoordinates !== null && MCoordinates.length > 0) && (
+                    {Array.isArray(MCoordinates) && MCoordinates.length === 2 && typeof MCoordinates[0] === 'number' && typeof MCoordinates[1] === 'number' ? (
                         <Marker
                             coordinate={{
                                 latitude: MCoordinates[0],
@@ -368,14 +368,7 @@ export default function Monument() {
                             title={monument}
                             description={description}
                         />
-                    )
-                        // :(
-                        //     <Text style={styles.description}>
-                        //         Coordinates not found for the monument.
-                        //     </Text>
-                        // )
-
-                    }
+                    ) : null}
                     {selfCoordinates.length > 0 && (
                         <Marker
                             coordinate={{
