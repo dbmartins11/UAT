@@ -41,8 +41,7 @@ export default function TabLayout() {
           });
         }
 
-        await scheduleTravelReminder(); // ✅ Agora chamado corretamente
-      } else {
+        await scheduleTravelReminder(); 
         console.warn('Must use physical device for notifications');
       }
     };

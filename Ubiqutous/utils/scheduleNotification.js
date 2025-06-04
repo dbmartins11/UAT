@@ -10,7 +10,7 @@ export const scheduleTravelReminder = async () => {
     },
     trigger: {
       type: 'timeInterval',
-      seconds: 200,
+      seconds: 300,
       repeats: true,
     },
   });
