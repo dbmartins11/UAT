@@ -22,6 +22,9 @@ const translations = {
     success: 'Success',
     profile_updated: 'Profile updated successfully!',
     error: 'Error',
+    Mmessage:'Monument successfully added to list!',
+    Cmessage:'City added successfully!',
+    CountryMessage:'Country successfully added to list!',
   },
   pt: {
     edit_profile: 'Editar Perfil',
@@ -43,6 +46,9 @@ const translations = {
     success: 'Sucesso',
     profile_updated: 'Perfil atualizado com sucesso!',
     error: 'Erro',
+    Mmessage:'Monument successfully added to list!',
+    Cmessage:'City added successfully!',
+    CountryMessage:'Country successfully added to list!',
   },
   sl: {
     edit_profile: 'Uredi profil',
@@ -64,6 +70,9 @@ const translations = {
     success: 'Uspeh',
     profile_updated: 'Profil uspešno posodobljen!',
     error: 'Napaka',
+    Mmessage:'Spomenik je bil uspešno dodan na seznam!',
+    Cmessage:'Mesto je bilo uspešno dodano!',
+    CountryMessage:'Država je bila uspešno dodana na seznam!',
   },
 };
 

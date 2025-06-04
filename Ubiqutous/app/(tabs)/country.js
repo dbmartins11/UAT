@@ -19,9 +19,15 @@ import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 import { use } from 'react';
 import { useTheme } from '../../components/ThemeContext';
 
+import { sendLocalNotification } from '../../utils/sendNotification.js';
+import { getCurrentLanguage, translate } from '../../utils/languageUtils';
+
+
 
 export default function Country() {
     const { darkMode } = useTheme();
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
 
     const navigation = useNavigation();
     const route = useRoute();
@@ -47,6 +53,16 @@ export default function Country() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const sidebarRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [language, setLanguage] = useState('en');
+
+    const getUserLanguage = async () => {
+        const lang = await getCurrentLanguage();
+        setLanguage(lang);
+    };
+
+    getUserLanguage();
+
+
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -227,26 +243,33 @@ export default function Country() {
         }
     };
 
-    const updateList = async (listName, city) => {
-        try {
-            const userListsRef = collection(db, 'users', userID, 'lists');
-            const listDoc = doc(userListsRef, listName);
-            const docSnap = await getDoc(listDoc);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                await updateDoc(listDoc, {
-                    [`countries.${country}`]: {
-                        visited: false,
-                    }
-                });
-            }
-            console.log("Country" + country + "added to list:", listName);
-            getLists();
-        } catch (error) {
-            console.error('Error updating list:', error);
-            Alert.alert('Error updating list', error.message);
+   
+const updateList = async (listName, city) => {
+  try {
+    const userListsRef = collection(db, 'users', userID, 'lists');
+    const listDoc = doc(userListsRef, listName);
+    const docSnap = await getDoc(listDoc);
+
+    if (docSnap.exists()) {
+      await updateDoc(listDoc, {
+        [`countries.${country}`]: {
+          visited: false,
         }
-    };
+      });
+
+      await sendLocalNotification(country);
+      setShowSuccessModal(true); 
+
+      console.log("Country " + country + " added to list:", listName);
+      getLists();
+    }
+  } catch (error) {
+    console.error('Error updating list:', error);
+    Alert.alert('Error updating list', error.message);
+  }
+};
+
+
 
 
     return (
@@ -400,23 +423,23 @@ export default function Country() {
                                     }}
                                     onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
                                     <Modal
-                                        animationType="fade"
                                         transparent={true}
-                                        visible={modalVisible}
-                                        onRequestClose={() => setModalVisible(false)}
-                                    >
+                                        visible={showSuccessModal}
+                                        animationType="fade"
+                                        onRequestClose={() => setShowSuccessModal(false)}
+                                        >
                                         <View style={{
                                             flex: 1,
-                                            backgroundColor: 'rgba(0,0,0,0.5)',
                                             justifyContent: 'center',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
                                         }}>
                                             <View style={{
-                                                backgroundColor: darkMode ? '#333' : '#fff',
-                                                padding: 30,
-                                                borderRadius: 12,
-                                                alignItems: 'center',
-                                                width: 250
+                                            backgroundColor: darkMode ? '#333' : '#fff',
+                                            padding: 25,
+                                            borderRadius: 12,
+                                            alignItems: 'center',
+                                            width: 250,
                                             }}>
                                                 <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#fff' }}>Create a new list?</Text>
                                                 <View>
@@ -456,6 +479,7 @@ export default function Country() {
                                             </View>
                                         </View>
                                     </Modal>
+
                                     <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>
