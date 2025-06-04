@@ -5,9 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { ThemeProvider } from '../../components/ThemeContext'; // Garante que o caminho está certo!
 
 
-
-
-
 export default function TabLayout() {
   return (
     <ThemeProvider>
@@ -15,7 +12,9 @@ export default function TabLayout() {
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
-            height: "10%",
+            height: "7%",
+            paddingTop: '2.5%',
+            paddingHorizontal: '7%',
             backgroundColor: '#C4D9FF',
           },
         }}
@@ -63,9 +62,52 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
+          name="Search"
+          options={{
+            tabBarLabel: " ",
+            tabBarIcon: ({ color, focused }) => (
+              <View>
+                {focused ? (
+                  <Image
+                    source={require('../../assets/icons/Search-f.png')}
+                    style={styles.icon}
+                  />
+                ) : (
+                  <Image
+                    source={require('../../assets/icons/Search.png')}
+                    style={styles.icon}
+                  />
+                )}
+              </View>
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="settings"
+          options={{
+            tabBarLabel: " ", 
+            tabBarIcon: ({ color, focused }) => (
+              <View>
+                {focused ? (
+                  <Image
+                    source={require('../../assets/icons/Settings-f.png')}
+                    style={styles.icon}
+                  />
+                ) : (
+                  <Image
+                    source={require('../../assets/icons/Settings.png')}
+                    style={styles.icon}
+                  />
+                )}
+              </View>
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="index"
           options={{
             href: null,
+            tabBarStyle: { display: "none" },
           }}
         />
         <Tabs.Screen
@@ -83,12 +125,33 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="settings"
+          name="city"
           options={{
-            tabBarLabel: 'Settings',
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="settings-outline" size={size} color={color} />
-            ),
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="country"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="lists"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="editprofile"
+          options={{
+            href: null,
+          }}
+        />
+        <Tabs.Screen
+          name="monument"
+          options={{
+            href: null,
           }}
         />
       </Tabs>

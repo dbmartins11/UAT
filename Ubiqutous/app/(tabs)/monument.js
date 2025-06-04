@@ -15,7 +15,7 @@ import * as Location from 'expo-location';
 import { useRef } from 'react';
 import { TouchableWithoutFeedback } from 'react-native';
 const { height: screenHeight } = Dimensions.get('window');
-import { doc, getDoc, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, updateDoc, arrayUnion } from 'firebase/firestore';
 import { TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, auth } from '../../firebase/firebaseConf';
@@ -33,7 +33,7 @@ export default function Monument() {
     });
     const [hasUrls, setHasUrls] = useState(false);
     const [urls, setUrls] = useState([]);
-    
+
     const [description, setDescription] = useState([]);
 
     const [coordinatesC, setCoordinatesC] = useState([]);
@@ -50,7 +50,7 @@ export default function Monument() {
     const sidebarRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
 
-   
+
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
     };
@@ -96,7 +96,7 @@ export default function Monument() {
                 }
             });
             console.log("List created successfully:", listName);
-            setModalVisible(false);            
+            setModalVisible(false);
             getLists();
         } catch (error) {
             Alert.alert('Error creating list', error.message);
@@ -120,7 +120,7 @@ export default function Monument() {
                     await updateDoc(listDoc, {
                         [`countries.${country}.cities.${city}.monuments`]: arrayUnion({ name: monument, visited: false })
                     });
-                    
+
                 } else if (data.countries?.[country]) {
                     console.log("City does not exist, adding new city:", city);
                     // Country exists, add new city
@@ -169,7 +169,7 @@ export default function Monument() {
             console.error('Error fetching lists:', error);
         }
     };
-            
+
     useEffect(() => {
         let url_;
         url === undefined ? url_ = false : url_ = true;
@@ -246,7 +246,7 @@ export default function Monument() {
         fetchData(monument);
         getLocation();
         fetchCoordinatesC(monument);
-        fetchCoordinatesM(monument);        
+        fetchCoordinatesM(monument);
         getUserID();
         getLists();
         if (url_ === false) {
@@ -279,9 +279,11 @@ export default function Monument() {
                     <ImageBackground
                         source={{ uri: urls[7] }}
                         style={styles.mainImg}>
-                        <BackButton
-                            style={styles.backButtonOverlay}
-                            onPress={onPress} />
+                        <View style={styles.backButtonCircle}>
+                            <BackButton
+                                style={styles.backButtonOverlay}
+                                onPress={onPress} />
+                        </View>
                     </ImageBackground>
                 ) : (
                     <Text style={styles.description}>
@@ -318,7 +320,7 @@ export default function Monument() {
                         longitudeDelta: 0.0421,
                     }}
                 >
-                    {(MCoordinates !== null && MCoordinates.length > 0) &&  (
+                    {(MCoordinates !== null && MCoordinates.length > 0) && (
                         <Marker
                             coordinate={{
                                 latitude: MCoordinates[0],
@@ -328,13 +330,13 @@ export default function Monument() {
                             description={description}
                         />
                     )
-                    // :(
-                    //     <Text style={styles.description}>
-                    //         Coordinates not found for the monument.
-                    //     </Text>
-                    // )
-                
-                }
+                        // :(
+                        //     <Text style={styles.description}>
+                        //         Coordinates not found for the monument.
+                        //     </Text>
+                        // )
+
+                    }
                     {selfCoordinates.length > 0 && (
                         <Marker
                             coordinate={{
@@ -355,12 +357,12 @@ export default function Monument() {
 
             {isSidebarOpen && (
                 <TouchableWithoutFeedback onPress={handleBackdropPress}>
-                    <View style={{position: 'absolute',top: 0,left: 0,right: 0,bottom: 0,backgroundColor: 'rgba(0,0,0,0.5)',justifyContent: 'flex-end',zIndex: 10}}>
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end', zIndex: 10 }}>
                         <TouchableWithoutFeedback>
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: '#fff',width: '70%',
+                                    backgroundColor: '#fff', width: '70%',
                                     height: '100%',
                                     position: 'absolute',
                                     right: 0,
@@ -387,7 +389,7 @@ export default function Monument() {
                                         alignItems: 'center',
                                         marginTop: 10,
                                     }}
-                                    onPress={() => {modalVisible ? setModalVisible(false) : setModalVisible(true)}}>
+                                    onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
                                     <Modal
                                         animationType="fade"
                                         transparent={true}
@@ -408,33 +410,33 @@ export default function Monument() {
                                                 width: 250
                                             }}>
                                                 <Text style={{ fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
-                                                    <View>
-                                                            <TextInput
-                                                                placeholder="List Name"
-                                                                value={listName}
-                                                                onChangeText={setListName}
-                                                                style={{
-                                                                    borderWidth: 1,
-                                                                    borderColor: '#ccc',
-                                                                    borderRadius: 8,
-                                                                    padding: 10,
-                                                                    marginBottom: 10,
-                                                                    width: 150,
-                                                                }}
-                                                            />
-                                                    </View>
-                                                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                                                        
+                                                <View>
+                                                    <TextInput
+                                                        placeholder="List Name"
+                                                        value={listName}
+                                                        onChangeText={setListName}
+                                                        style={{
+                                                            borderWidth: 1,
+                                                            borderColor: '#ccc',
+                                                            borderRadius: 8,
+                                                            padding: 10,
+                                                            marginBottom: 10,
+                                                            width: 150,
+                                                        }}
+                                                    />
+                                                </View>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+
                                                     <TouchableOpacity
-                                                        style={{ backgroundColor: '#000',paddingVertical: 10,paddingHorizontal: 20, borderRadius: 8,marginRight: 10,}}
-                                                        onPress={() => {                                                                
+                                                        style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
+                                                        onPress={() => {
                                                             createList();
                                                         }}>
                                                         <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
                                                     </TouchableOpacity>
 
 
-                                                    <TouchableOpacity style={{backgroundColor: '#ccc', paddingVertical: 10,paddingHorizontal: 20,borderRadius: 8,}}
+                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
                                                         onPress={() => setModalVisible(false)}>
                                                         <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
                                                     </TouchableOpacity>
@@ -478,8 +480,18 @@ const styles = StyleSheet.create({
     },
 
     backButtonOverlay: {
-        position: 'absolute',
-        marginTop: '4%',
+        //backgroundColor: 'blue',
+        right: '10%',
+    },
+
+    backButtonCircle: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        top: '6%',
         left: '4%',
     },
 
