@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, ScrollView } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_600SemiBold } from '@expo-google-fonts/open-sans';
@@ -23,8 +24,7 @@ import { getDocs } from 'firebase/firestore';
 import { use } from 'react';
 import { useNavigation } from 'expo-router';
 import { useTheme } from '../../components/ThemeContext';
-
-
+import { translateAzure } from '../../api/apiTranslateAzure.js';
 
 export default function Monument() {
     const navigation = useNavigation();
@@ -39,13 +39,13 @@ export default function Monument() {
     const [urls, setUrls] = useState([]);
 
     const [description, setDescription] = useState([]);
-
+    const [lang, setLang] = useState();
     const [coordinatesC, setCoordinatesC] = useState([]);
     const [selfCoordinates, setSelfCoordinates] = useState([]);
     const [MCoordinates, setMCoordinates] = useState([]);
     const route = useRoute();
     const { monument, city, country, url, prevUrls } = route.params;
-
+    const [monument_, setMonument_] = useState(monument);
     const [listName, setListName] = useState('');
     const [myLists, setMyLists] = useState([]);
     const [userID, setUserID] = useState('');
@@ -174,6 +174,31 @@ export default function Monument() {
         }
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            const getLang = async () => {
+                const language = await AsyncStorage.getItem('appLanguage');
+                if (language) {
+                    setLang(language);
+                    const translated = await translateAzure(monument, language);
+                    setMonument_(translated);
+                } else {
+                    setLang('en');
+                }
+            }
+            getLang();
+        }, [])
+    );
+
+    useEffect(() => {
+        const translateCountries = async () => {
+            setMonuments(translatedCountries);
+            const translated = await translateAzure(monument, lang);
+            setMonument_(translated);
+        };
+        translateCountries();
+    }, [lang]);
+
     useEffect(() => {
         let url_;
         url === undefined ? url_ = false : url_ = true;
@@ -181,7 +206,8 @@ export default function Monument() {
         const fetchData = async (monument) => {
             try {
                 const data = await fetchMonumentDescription(monument);
-                setDescription(data);
+                const translatedData = await translateAzure(data, lang);
+                setDescription(translatedData);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }
@@ -300,13 +326,13 @@ export default function Monument() {
                 )}
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
-                {monument ?
-                    <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{monument}</Text>
+                {monument_ ?
+                    <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{monument_}</Text>
                     :
                     <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                 }
                 <TouchableOpacity
-                            style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
+                    style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
                     onPress={toggleSidebar}>
                     <Image
                         source={require('./../../assets/icons/save.png')}
@@ -363,11 +389,23 @@ export default function Monument() {
             <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: 'blue' }]} />
-                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>Me</Text>
+                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>
+                        {{
+                            en: "Me",
+                            pt: "Eu",
+                            sl: "Jaz"
+                        }[lang] || "Me"}
+                    </Text>
                 </View>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: 'red' }]} />
-                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>Monument</Text>
+                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>
+                        {{
+                            en: "Monument",
+                            pt: "Monumento",
+                            sl: "Spomenik"
+                        }[lang] || "Monument"}
+                    </Text>
                 </View>
             </View>
 
@@ -383,7 +421,7 @@ export default function Monument() {
                                     height: '100%',
                                     position: 'absolute',
                                     right: 0,
-                                    top: 0, 
+                                    top: 0,
                                     padding: 20,
                                 }}>
                                 <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Lists</Text>
@@ -420,7 +458,7 @@ export default function Monument() {
                                             alignItems: 'center'
                                         }}>
                                             <View style={{
-                                               backgroundColor: darkMode ? '#333' : '#000',
+                                                backgroundColor: darkMode ? '#333' : '#000',
                                                 padding: 30,
                                                 borderRadius: 12,
                                                 alignItems: 'center',

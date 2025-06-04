@@ -5,17 +5,24 @@ import { fetchSearch } from '../../api/apiNominatim';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
 import { useTheme } from '../../components/ThemeContext';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SearchScreen() {
   const navigation = useNavigation();
 
   const { darkMode } = useTheme();
 
+  const [lang, setLang] = useState('en');
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const searchText = {
+    en: "Search for a city, country or monument",
+    pt: "Pesquise por cidade, país ou monumento",
+    sl: "Poišči mesto, državo ali spomenik"
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -23,6 +30,12 @@ export default function SearchScreen() {
       setSuggestions([]);
       setLoading(false);
       setSearched(false);
+
+      const getLang = async () => {
+        const language = await AsyncStorage.getItem('appLanguage');
+        setLang(language || 'en');
+      };
+      getLang();
     }, [])
   );
 
@@ -75,14 +88,14 @@ export default function SearchScreen() {
         country: item.name,
       });
     }
-    
+
     else if (item.addresstype === 'county' || item.addresstype === 'city') {
       navigation.navigate('city', {
         city: item.name,
         country: item.address?.country,
       });
     }
-    
+
     else {
       navigation.navigate('city', {
         city: item.name,
@@ -94,21 +107,21 @@ export default function SearchScreen() {
   return (
     <View style={[styles.container, { backgroundColor: darkMode ? '#000' : '#fff', flex: 1 }]}>
       <View style={[
-          styles.searchBox,
-          { backgroundColor: darkMode ? '#222' : '#DEEFFA' }
-        ]}>
-      <Ionicons name="search" size={20} color={darkMode ? '#fff' : '#333'} style={{ marginRight: 10 }} />
+        styles.searchBox,
+        { backgroundColor: darkMode ? '#222' : '#DEEFFA' }
+      ]}>
+        <Ionicons name="search" size={20} color={darkMode ? '#fff' : '#333'} style={{ marginRight: 10 }} />
 
         <TextInput
           style={[styles.input, { color: darkMode ? '#fff' : '#000' }]}
-          placeholder="Search for a city, country or monument"
+          placeholder={searchText[lang] || searchText.en}
           placeholderTextColor={darkMode ? '#aaa' : '#666'}
           value={query}
           onChangeText={setQuery}
         />
 
       </View>
- 
+
       {loading && <Text style={[styles.loading, { color: darkMode ? '#ccc' : 'grey' }]}>Loading Suggestions</Text>}
 
 
@@ -118,8 +131,8 @@ export default function SearchScreen() {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
-            styles.suggestionItem,
-            { borderBottomColor: darkMode ? '#555' : '#ccc' }
+              styles.suggestionItem,
+              { borderBottomColor: darkMode ? '#555' : '#ccc' }
             ]}
             onPress={() => handleSelectSuggestion(item)}
           >

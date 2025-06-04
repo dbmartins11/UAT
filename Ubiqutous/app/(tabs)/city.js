@@ -11,9 +11,9 @@ import { fetchMonumentsWiki } from '../../api/apiWikipedia.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
 import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
-
+import { translateAzure } from '../../api/apiTranslateAzure.js';
 import { db } from '../../firebase/firebaseConf';
-import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
+import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
@@ -27,10 +27,12 @@ export default function City() {
     const route = useRoute();
     const { city, urls, country, prevUrls } = route.params;
 
+    const [lang, setLang] = useState();
     const [url, setUrl] = useState(urls || []);
     const [images, setImages] = useState([]);
     const [getNames, setGetNames] = useState(false);
     const [imagesReady, setImagesReady] = useState(false);
+    const [monumentsNAV, setMonumentsNAV] = useState([]);
     const [monuments, setMonuments] = useState([]);
     const [monumentsImg, setMonumentsImg] = useState([]);
     const [fontsLoaded] = useFonts({
@@ -101,8 +103,17 @@ export default function City() {
             const fetchData = async (city) => {
                 let dataNames = [];
                 try {
-                    dataNames = await fetchMonuments(`${city}`);
-                    setMonuments(dataNames);
+                    const cityEN = await translateAzure(city, 'en');
+                    dataNames = await fetchMonuments(`${cityEN}`);
+                    const translatedMonuments = await Promise.all(
+                        dataNames.map(async (country) => {
+                            const translated = await translateAzure(country, lang);
+                            return translated;
+                        })
+                    );
+                    console.log("ADAWEDDSADA: ", translatedMonuments);
+                    setMonuments(translatedMonuments);
+                    setMonumentsNAV(dataNames);
                     setGetNames(true);
                 } catch (error) {
                     console.error('Error fetching the cities\' names:', error);
@@ -128,7 +139,9 @@ export default function City() {
 
             const fetchCityImages = async (city) => {
                 try {
-                    const data = await fetchImagesUnsplash(city);
+                    const cityEN = await translateAzure(city, 'en');
+                    console.log("City in EN: ", cityEN);
+                    const data = await fetchImagesUnsplash(cityEN);
                     setUrl(data);
                 } catch (error) {
                     console.error('Error fetching data:', error);
@@ -139,6 +152,16 @@ export default function City() {
                 fetchCityImages(city);
             }
 
+            const getLang = async () => {
+                const language = await AsyncStorage.getItem('appLanguage');
+                if (language) {
+                    setLang(language);
+                } else {
+                    setLang('en');
+                }
+            }
+            getLang();
+
             getUserID();
             getLists();
             fetchData(city);
@@ -148,6 +171,16 @@ export default function City() {
 
         }, [city, urls])
     );
+
+
+    useEffect(() => {
+        const translateCountries = async () => {
+
+            setMonuments(translatedCountries);
+        };
+        translateCountries();
+    }, [lang]);
+
 
 
     useEffect(() => {
@@ -257,11 +290,11 @@ export default function City() {
     };
 
     return (
-        <View style={{ 
-            flex: 1, 
-            padding: 10, 
-            backgroundColor: darkMode ? '#000' : '#fff' 
-            }}>
+        <View style={{
+            flex: 1,
+            padding: 10,
+            backgroundColor: darkMode ? '#000' : '#fff'
+        }}>
 
             {imagesReady ? (
                 <View>
@@ -326,7 +359,7 @@ export default function City() {
                                     key={index}
                                     style={styles.monuments}
                                     onPress={() => navigation.navigate('monument', {
-                                        monument: monument,
+                                        monument: monumentsNAV[index],
                                         city: city,
                                         country: country,
                                         url: monumentsImg[index],
@@ -368,7 +401,7 @@ export default function City() {
                 </View>
             ) :
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
+                    <Text style={{ color: darkMode ? '#fff' : '#fff', fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
                         Loading
                     </Text>
                     <ActivityIndicator
@@ -394,7 +427,7 @@ export default function City() {
                                     top: 0,
                                     padding: 20,
                                 }}>
-                                <Text style={{color: darkMode ? '#fff' : '#000', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
+                                <Text style={{ color: darkMode ? '#fff' : '#000', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
                                 {(
                                     myLists.map((list, idx) => (
                                         <TouchableOpacity
@@ -434,7 +467,7 @@ export default function City() {
                                                 alignItems: 'center',
                                                 width: 250
                                             }}>
-                                                <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
+                                                <Text style={{ color: darkMode ? '#fff' : '#fff', fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
                                                 <View>
                                                     <TextInput
                                                         placeholder="List Name"

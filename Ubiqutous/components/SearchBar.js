@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SearchBar() {
     const router = useRouter();
+
+    const [lang, setLang] = useState('en');
+
+    useFocusEffect(
+        useCallback(() => {
+        const getLang = async () => {
+            const language = await AsyncStorage.getItem('appLanguage');
+            setLang(language || 'en');
+        };
+        getLang();
+        }, [])
+    );
+
+    const searchText = {
+        en: "Search for a city, country or monument",
+        pt: "Pesquise por cidade, país ou monumento",
+        sl: "Poišči mesto, državo ali spomenik"
+    };
 
     return (
         <View style={styles.bar}>
@@ -13,7 +32,7 @@ export default function SearchBar() {
                 style={styles.button}
                 onPress={() => router.push('/(tabs)/Search')}
             >
-                <Text>Search for a city, country or monument</Text>
+                <Text>{searchText[lang] || searchText.en}</Text>
             </TouchableOpacity>
         </View>
     );

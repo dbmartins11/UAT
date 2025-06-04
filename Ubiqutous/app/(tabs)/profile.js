@@ -19,7 +19,7 @@ import { getCurrentLanguage, translate } from '../../utils/languageUtils';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 
 export default function ProfileScreen() {
-  
+
   const navigation = useNavigation();
   const router = useRouter();
   const { darkMode } = useTheme();
@@ -34,45 +34,45 @@ export default function ProfileScreen() {
   const [aboutMe, setAboutMe] = useState('');
   const [language, setLanguage] = useState('en');
   const [myLists, setMyLists] = useState([]);
-  
+
   useFocusEffect(
-  useCallback(() => {
-    let isActive = true;
+    useCallback(() => {
+      let isActive = true;
 
-    const fetchData = async () => {
-      const lang = await getCurrentLanguage();
-      setLanguage(lang); // Isto vai forçar rerender com novo idioma
+      const fetchData = async () => {
+        const lang = await getCurrentLanguage();
+        setLanguage(lang); // Isto vai forçar rerender com novo idioma
 
 
-      const user = auth.currentUser;  
-      if (!user) return;
-      await user.reload();
-      const docRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(docRef);
+        const user = auth.currentUser;
+        if (!user) return;
+        await user.reload();
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
 
-      if (docSnap.exists() && isActive) {
-        const data = docSnap.data();
-        setUsername(data.username || 'Unnamed');
-        setEmail(data.email || user.email);
-        setAboutMe(data.aboutMe || '');
-      }
+        if (docSnap.exists() && isActive) {
+          const data = docSnap.data();
+          setUsername(data.username || 'Unnamed');
+          setEmail(data.email || user.email);
+          setAboutMe(data.aboutMe || '');
+        }
 
-      const listsRef = collection(db, 'users', user.uid, 'lists');     
-      const snapshot = await getDocs(listsRef);
-      const lists = [];
-      snapshot.forEach(doc => {
-        lists.push({ id: doc.id, ...doc.data() });
-      });
+        const listsRef = collection(db, 'users', user.uid, 'lists');
+        const snapshot = await getDocs(listsRef);
+        const lists = [];
+        snapshot.forEach(doc => {
+          lists.push({ id: doc.id, ...doc.data() });
+        });
         setMyLists(lists);
-    };
+      };
 
-    fetchData();
+      fetchData();
 
-    return () => {
-      isActive = false;
-    };
-  }, []) // Deixa dependências vazias!
-);
+      return () => {
+        isActive = false;
+      };
+    }, []) // Deixa dependências vazias!
+  );
 
 
   useEffect(() => {
@@ -102,9 +102,9 @@ export default function ProfileScreen() {
 
   const handleList = async (listName) => {
     try {
-      navigation.navigate('lists', {listName: listName, userID: auth.currentUser.uid,});
-      }
-      catch (error) {
+      navigation.navigate('lists', { listName: listName, userID: auth.currentUser.uid, });
+    }
+    catch (error) {
       alert('Error going to lists: ' + error.message);
     }
   }
@@ -126,20 +126,32 @@ export default function ProfileScreen() {
         <View style={styles.statsRow}>
           <View style={[styles.statBox, { backgroundColor: cardColor }]}>
             <Text style={[styles.statNumber, { color: textColor }]}>{myLists.length}</Text>
-            <Text style={[styles.statLabel, { color: subtitleColor }]}>{translate('My Lists', language)}</Text>
+            <Text style={[styles.statLabel, { color: subtitleColor }]}>
+              {{
+                en: "My Lists",
+                pt: "As Minhas Listas",
+                sl: "Moji Seznami"
+              }[language] || "My Lists"}
+            </Text>
           </View>
         </View>
 
 
-        <Text style={[styles.sectionTitle, { color: textColor }]}> Lists </Text>  
+        <Text style={[styles.sectionTitle, { color: textColor }]}>
+          {{
+            en: "Lists",
+            pt: "Listas",
+            sl: "Seznami"
+          }[language] || "Lists"}
+        </Text>
         {myLists.length == [] ? (
           <Text style={{ color: subtitleColor, marginBottom: 16, textAlign: 'center' }}>
             {'No lists yet. Go to a country page and create your first list!'}
           </Text>
         ) : (
           myLists.map((item, index) => (
-            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() => 
-                                  handleList(item.name)}>
+            <TouchableOpacity key={index} style={[styles.listCard, { backgroundColor: cardColor }]} onPress={() =>
+              handleList(item.name)}>
               <View>
                 <Text style={[styles.listTitle, { color: textColor }]}>{item.name}</Text>
                 <Text style={[styles.listDescription, { color: subtitleColor }]}>{item.description}</Text>
@@ -149,20 +161,20 @@ export default function ProfileScreen() {
         )}
 
         <TouchableOpacity
-            style={[
+          style={[
             styles.editButton,
             darkMode && styles.buttonDark,
-            ]}  
-            onPress={() => router.push('/editprofile')}
-        > 
+          ]}
+          onPress={() => router.push('/editprofile')}
+        >
           <Text style={styles.editButtonText}>{translate('edit_profile', language)}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-            style={[
+          style={[
             styles.logoutButton,
             darkMode && styles.buttonDark,
-            ]}
-            onPress={handleLogout}
+          ]}
+          onPress={handleLogout}
         >
           <Text style={styles.logoutButtonText}>{translate('logout', language)}</Text>
         </TouchableOpacity>
@@ -173,52 +185,53 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   background: { flex: 1 },
-  container: { 
+  container: {
     alignItems: 'center',
     paddingVertical: 40,
-    paddingHorizontal: 20 },
+    paddingHorizontal: 20
+  },
 
   avatar: {
     width: 80,
-    height: 80, 
+    height: 80,
     borderRadius: 40,
-    backgroundColor: '#3A5BA0', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
+    backgroundColor: '#3A5BA0',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 10,
   },
 
-  avatarText: { 
-    color: 'white', 
-    fontSize: 32, 
-    fontWeight: 'bold' 
+  avatarText: {
+    color: 'white',
+    fontSize: 32,
+    fontWeight: 'bold'
   },
 
-  username: { 
-    fontWeight: '600', 
-    fontSize: 18, 
-    marginBottom: 4 
+  username: {
+    fontWeight: '600',
+    fontSize: 18,
+    marginBottom: 4
   },
 
-  about: { 
-    fontSize: 14, 
-    color: '#555', 
-    marginBottom: 12 
+  about: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 12
   },
 
-  statsRow: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-around', 
-    width: '100%', 
-    marginBottom: 20 
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 20
   },
 
-  statBox: { 
-    alignItems: 'center', 
-    padding: 10, 
-    backgroundColor: '#dbe7fb', 
-    borderRadius: 10, 
-    width: 90 
+  statBox: {
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: '#dbe7fb',
+    borderRadius: 10,
+    width: 90
   },
   statNumber: { fontWeight: 'bold', fontSize: 20, color: '#3A5BA0' },
   statLabel: { textAlign: 'center', fontSize: 12, marginTop: 4 },
@@ -237,29 +250,29 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
   },
-  listTitle: { 
-    fontWeight: 'bold', 
-    fontSize: 14 
+  listTitle: {
+    fontWeight: 'bold',
+    fontSize: 14
   },
-  listDescription: { 
-    fontSize: 12, 
-    color: '#555' 
+  listDescription: {
+    fontSize: 12,
+    color: '#555'
   },
-  listImage: { 
-    width: 50, 
-    height: 50, 
-    borderRadius: 6 
+  listImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 6
   },
   editButton: {
-    backgroundColor: '#3A5BA0', 
-    paddingVertical: 10, 
+    backgroundColor: '#3A5BA0',
+    paddingVertical: 10,
     paddingHorizontal: 30,
-    borderRadius: 8, 
+    borderRadius: 8,
     marginTop: 10,
   },
-  editButtonText: { 
-    color: 'white', 
-    fontWeight: 'bold' 
+  editButtonText: {
+    color: 'white',
+    fontWeight: 'bold'
   },
   buttonDark: {
     backgroundColor: '#222', // ou '#1a1a1a'
@@ -268,14 +281,14 @@ const styles = StyleSheet.create({
   },
 
   logoutButton: {
-    backgroundColor: '#a03a3a', 
-    paddingVertical: 10, 
+    backgroundColor: '#a03a3a',
+    paddingVertical: 10,
     paddingHorizontal: 30,
-    borderRadius: 8, 
+    borderRadius: 8,
     marginTop: 10,
   },
-  logoutButtonText: { 
-    color: 'white', 
-    fontWeight: 'bold' 
+  logoutButtonText: {
+    color: 'white',
+    fontWeight: 'bold'
   },
 });
