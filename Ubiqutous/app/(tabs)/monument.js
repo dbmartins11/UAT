@@ -300,7 +300,7 @@ export default function Monument() {
                     <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                 }
                 <TouchableOpacity
-                    style={{ marginLeft: 20, borderRadius: 25, }}
+                            style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
                     onPress={toggleSidebar}>
                     <Image
                         source={require('./../../assets/icons/save.png')}
@@ -360,15 +360,15 @@ export default function Monument() {
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: darkMode ? '#222' : '#fff',
+                                    backgroundColor: darkMode ? '#333' : '#fff',
                                     width: '70%',
                                     height: '100%',
                                     position: 'absolute',
                                     right: 0,
-                                    top: 0,
+                                    top: 0, 
                                     padding: 20,
                                 }}>
-                                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
+                                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Lists</Text>
                                 {(
                                     myLists.map((list, idx) => (
                                         <TouchableOpacity
@@ -402,7 +402,7 @@ export default function Monument() {
                                             alignItems: 'center'
                                         }}>
                                             <View style={{
-                                                backgroundColor: '#fff',
+                                               backgroundColor: darkMode ? '#333' : '#000',
                                                 padding: 30,
                                                 borderRadius: 12,
                                                 alignItems: 'center',
@@ -412,7 +412,6 @@ export default function Monument() {
                                                     <View>
                                                             <TextInput
                                                                 placeholder="List Name"
-                                                                placeholderTextColor={darkMode ? '#999' : '#666'}
                                                                 value={listName}
                                                                 onChangeText={setListName}
                                                                 style={{
@@ -422,8 +421,6 @@ export default function Monument() {
                                                                     padding: 10,
                                                                     marginBottom: 10,
                                                                     width: 150,
-                                                                    backgroundColor: darkMode ? '#333' : '#fff',
-                                                                    color: darkMode ? '#fff' : '#000'
                                                                 }}  
                                                             />
 
@@ -435,13 +432,13 @@ export default function Monument() {
                                                         onPress={() => {
                                                             createList();
                                                         }}>
-                                                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
                                                     </TouchableOpacity>
 
 
                                                     <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
                                                         onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Cancel</Text>
                                                     </TouchableOpacity>
 
 
@@ -449,7 +446,7 @@ export default function Monument() {
                                             </View>
                                         </View>
                                     </Modal>
-                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                    <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableWithoutFeedback>

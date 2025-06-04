@@ -268,7 +268,7 @@ export default function Country() {
                             <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                         }
                         <TouchableOpacity
-                            style={{ marginLeft: 20, borderRadius: 25, }}
+                            style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
                             onPress={toggleSidebar}>
                             <Image
                                 source={require('./../../assets/icons/save.png')}
@@ -343,7 +343,7 @@ export default function Country() {
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: darkMode ? '#111' : '#fff',
+                                    backgroundColor: darkMode ? '#333' : '#fff',
                                     width: '70%',
                                     height: '100%',
                                     position: 'absolute',
@@ -385,13 +385,13 @@ export default function Country() {
                                             alignItems: 'center'
                                         }}>
                                             <View style={{
-                                                backgroundColor: darkMode ? '#111' : '#fff',
+                                                backgroundColor: darkMode ? '#333' : '#fff',
                                                 padding: 30,
                                                 borderRadius: 12,
                                                 alignItems: 'center',
                                                 width: 250
                                             }}>
-                                                <Text style={{ fontSize: 18, marginBottom: 20,  color: darkMode ? '#fff' : '#000' }}>Create a new list?</Text>
+                                                <Text style={{ fontSize: 18, marginBottom: 20,  color: darkMode ? '#fff' : '#fff' }}>Create a new list?</Text>
                                                 <View>
                                                     <TextInput
                                                         placeholder="List Name"
@@ -414,14 +414,14 @@ export default function Country() {
                                                         onPress={() => {
                                                             createList();
                                                         }}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#000', fontWeight: 'bold'  }}>Create</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold'  }}>Create</Text>
                                                        
                                                     </TouchableOpacity>
 
 
-                                                    <TouchableOpacity style={{ backgroundColor: darkMode ? '#333' : '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
+                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
                                                         onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#000' }}>Cancel</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff' }}>Cancel</Text>
                                                     </TouchableOpacity>
 
 
@@ -429,7 +429,7 @@ export default function Country() {
                                             </View>
                                         </View>
                                     </Modal>
-                                    <Text style={{ color: darkMode ? '#fff' : '#000', fontWeight: 'bold'  }}>Create New List</Text>
+                                    <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableWithoutFeedback>

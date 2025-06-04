@@ -307,7 +307,7 @@ export default function City() {
                             <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                         }
                         <TouchableOpacity
-                            style={{ marginLeft: 20, borderRadius: 25, }}
+                            style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
                             onPress={toggleSidebar}>
                             <Image
                                 source={require('./../../assets/icons/save.png')}
@@ -394,7 +394,7 @@ export default function City() {
                                     top: 0,
                                     padding: 20,
                                 }}>
-                                <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
+                                <Text style={{color: darkMode ? '#fff' : '#000', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
                                 {(
                                     myLists.map((list, idx) => (
                                         <TouchableOpacity
