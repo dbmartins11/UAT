@@ -19,9 +19,15 @@ import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 import { use } from 'react';
 import { useTheme } from '../../components/ThemeContext';
 
+import { sendLocalNotification } from '../../utils/sendNotification.js';
+import { getCurrentLanguage, translate } from '../../utils/languageUtils';
+
+
 
 export default function Country() {
     const { darkMode } = useTheme();
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
 
     const navigation = useNavigation();
     const route = useRoute();
@@ -45,6 +51,16 @@ export default function Country() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const sidebarRef = useRef(null);
     const [modalVisible, setModalVisible] = useState(false);
+    const [language, setLanguage] = useState('en');
+
+    const getUserLanguage = async () => {
+        const lang = await getCurrentLanguage();
+        setLanguage(lang);
+    };
+
+    getUserLanguage();
+
+
 
     const toggleSidebar = () => {
         setIsSidebarOpen(!isSidebarOpen);
@@ -76,6 +92,36 @@ export default function Country() {
             console.error('Error fetching lists:', error);
         }
     };
+
+    const LoadImages = async () => {
+    const preloadImages = async (urls) => {
+        const cacheImages = urls.map((url) => Image.prefetch(url));
+        await Promise.all(cacheImages);
+    };
+
+    await preloadImages(getUrls);
+    setImagesReady(true);
+    };
+
+
+    useEffect(() => {
+        const getUserID = async () => {
+            const id = await AsyncStorage.getItem('userID');
+            setUserID(id || 'Unnamed');
+            console.log("User ID: ", userID);
+        };
+
+        const getUserLanguage = async () => {
+            const lang = await getCurrentLanguage();
+            setLanguage(lang);
+        };
+
+        getUserID();
+        getUserLanguage();
+        getLists();
+        
+        }, [getNames]);
+
 
     useEffect(() => {
         setImagesReady(false);
@@ -200,26 +246,33 @@ export default function Country() {
         }
     };
 
-    const updateList = async (listName, city) => {
-        try {
-            const userListsRef = collection(db, 'users', userID, 'lists');
-            const listDoc = doc(userListsRef, listName);
-            const docSnap = await getDoc(listDoc);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                await updateDoc(listDoc, {
-                    [`countries.${country}`]: {
-                        visited: false,
-                    }
-                });
-            }
-            console.log("Country" + country + "added to list:", listName);
-            getLists();
-        } catch (error) {
-            console.error('Error updating list:', error);
-            Alert.alert('Error updating list', error.message);
+   
+const updateList = async (listName, city) => {
+  try {
+    const userListsRef = collection(db, 'users', userID, 'lists');
+    const listDoc = doc(userListsRef, listName);
+    const docSnap = await getDoc(listDoc);
+
+    if (docSnap.exists()) {
+      await updateDoc(listDoc, {
+        [`countries.${country}`]: {
+          visited: false,
         }
-    };
+      });
+
+      await sendLocalNotification(country);
+      setShowSuccessModal(true); 
+
+      console.log("Country " + country + " added to list:", listName);
+      getLists();
+    }
+  } catch (error) {
+    console.error('Error updating list:', error);
+    Alert.alert('Error updating list', error.message);
+  }
+};
+
+
 
 
     return (
@@ -373,62 +426,43 @@ export default function Country() {
                                     }}
                                     onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
                                     <Modal
-                                        animationType="fade"
                                         transparent={true}
-                                        visible={modalVisible}
-                                        onRequestClose={() => setModalVisible(false)}
-                                    >
+                                        visible={showSuccessModal}
+                                        animationType="fade"
+                                        onRequestClose={() => setShowSuccessModal(false)}
+                                        >
                                         <View style={{
                                             flex: 1,
-                                            backgroundColor: 'rgba(0,0,0,0.5)',
                                             justifyContent: 'center',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
                                         }}>
                                             <View style={{
-                                                backgroundColor: darkMode ? '#333' : '#fff',
-                                                padding: 30,
-                                                borderRadius: 12,
-                                                alignItems: 'center',
-                                                width: 250
+                                            backgroundColor: darkMode ? '#333' : '#fff',
+                                            padding: 25,
+                                            borderRadius: 12,
+                                            alignItems: 'center',
+                                            width: 250,
                                             }}>
-                                                <Text style={{ fontSize: 18, marginBottom: 20,  color: darkMode ? '#fff' : '#fff' }}>Create a new list?</Text>
-                                                <View>
-                                                    <TextInput
-                                                        placeholder="List Name"
-                                                        value={listName}
-                                                        onChangeText={setListName}
-                                                        style={{
-                                                            borderWidth: 1,
-                                                            borderColor: '#ccc',
-                                                            borderRadius: 8,
-                                                            padding: 10,
-                                                            marginBottom: 10,
-                                                            width: 150,
-                                                        }}
-                                                    />
-                                                </View>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+                                            <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#000', textAlign: 'center' }}>
+                                                {translate('CountryMessage', language)}
+                                            </Text>
 
-                                                    <TouchableOpacity
-                                                        style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
-                                                        onPress={() => {
-                                                            createList();
-                                                        }}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold'  }}>Create</Text>
-                                                       
-                                                    </TouchableOpacity>
-
-
-                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
-                                                        onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff' }}>Cancel</Text>
-                                                    </TouchableOpacity>
-
-
-                                                </View>
+                                            <TouchableOpacity
+                                                onPress={() => setShowSuccessModal(false)}
+                                                style={{
+                                                backgroundColor: '#3A5BA0',
+                                                paddingVertical: 10,
+                                                paddingHorizontal: 20,
+                                                borderRadius: 8,
+                                                }}
+                                            >
+                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>OK</Text>
+                                            </TouchableOpacity>
                                             </View>
                                         </View>
                                     </Modal>
+
                                     <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>

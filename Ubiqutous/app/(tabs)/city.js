@@ -18,6 +18,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 
+import { sendLocalNotification } from '../../utils/sendNotification.js';
+
 import { useTheme } from '../../components/ThemeContext';
 
 export default function City() {
@@ -39,6 +41,7 @@ export default function City() {
         CrimsonText_400Regular,
     });
 
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
 
     const [listName, setListName] = useState('');
     const [myLists, setMyLists] = useState([]);
@@ -221,40 +224,45 @@ export default function City() {
     };
 
     const updateList = async (listName, city) => {
-        try {
-            const userListsRef = collection(db, 'users', userID, 'lists');
-            const listDoc = doc(userListsRef, listName);
-            const docSnap = await getDoc(listDoc);
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.countries[country]) {
-                    // Country exists, add new city
-                    await updateDoc(listDoc, {
-                        [`countries.${country}.cities.${city}`]: {
-                            visited: false,
-                        }
-                    });
-                } else {
-                    // Country doesn't exist, create it
-                    await updateDoc(listDoc, {
-                        [`countries.${country}`]: {
-                            visited: false,
-                            cities: {
-                                [city]: {
-                                    visited: false,
-                                }
+    try {
+        const userListsRef = collection(db, 'users', userID, 'lists');
+        const listDoc = doc(userListsRef, listName);
+        const docSnap = await getDoc(listDoc);
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.countries[country]) {
+                await updateDoc(listDoc, {
+                    [`countries.${country}.cities.${city}`]: {
+                        visited: false,
+                    }
+                });
+            } else {
+                await updateDoc(listDoc, {
+                    [`countries.${country}`]: {
+                        visited: false,
+                        cities: {
+                            [city]: {
+                                visited: false,
                             }
                         }
-                    });
-                }
+                    }
+                });
             }
-            console.log("City added to list:", listName);
-            getLists();
-        } catch (error) {
-            console.error('Error updating list:', error);
-            Alert.alert('Error updating list', error.message);
         }
-    };
+
+        console.log("City added to list:", listName);
+        getLists();
+
+        await sendLocalNotification(city);
+        setShowSuccessModal(true);
+
+
+    } catch (error) {
+        console.error('Error updating list:', error);
+        Alert.alert('Error updating list', error.message);
+    }
+};
+
 
     return (
         <View style={{ 
@@ -386,7 +394,7 @@ export default function City() {
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: darkMode ? '#333' : '#000',
+                                    backgroundColor: darkMode ? '#333' : '#fff',
                                     width: '70%',
                                     height: '100%',
                                     position: 'absolute',
@@ -416,61 +424,47 @@ export default function City() {
                                     }}
                                     onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
                                     <Modal
-                                        animationType="fade"
                                         transparent={true}
-                                        visible={modalVisible}
-                                        onRequestClose={() => setModalVisible(false)}
-                                    >
+                                        visible={showSuccessModal}
+                                        animationType="fade"
+                                        onRequestClose={() => setShowSuccessModal(false)}
+                                        >
                                         <View style={{
                                             flex: 1,
-                                            backgroundColor: 'rgba(0,0,0,0.5)',
                                             justifyContent: 'center',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
                                         }}>
                                             <View style={{
-                                                backgroundColor: darkMode ? '#333' : '#000',
-                                                padding: 30,
-                                                borderRadius: 12,
-                                                alignItems: 'center',
-                                                width: 250
+                                            backgroundColor: darkMode ? '#333' : '#fff',
+                                            padding: 25,
+                                            borderRadius: 12,
+                                            alignItems: 'center',
+                                            width: 250,
                                             }}>
-                                                <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
-                                                <View>
-                                                    <TextInput
-                                                        placeholder="List Name"
-                                                        value={listName}
-                                                        onChangeText={setListName}
-                                                        style={{
-                                                            borderWidth: 1,
-                                                            borderColor: '#ccc',
-                                                            borderRadius: 8,
-                                                            padding: 10,
-                                                            marginBottom: 10,
-                                                            width: 150,
-                                                        }}
-                                                    />
-                                                </View>
-                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-
-                                                    <TouchableOpacity
-                                                        style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
-                                                        onPress={() => {
-                                                            createList();
-                                                        }}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
-                                                    </TouchableOpacity>
-
-
-                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
-                                                        onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Cancel</Text>
-                                                    </TouchableOpacity>
-
-
-                                                </View>
+                                            <Text style={{
+                                                fontSize: 18,
+                                                marginBottom: 20,
+                                                color: darkMode ? '#fff' : '#000',
+                                                textAlign: 'center'
+                                            }}>
+                                                City added successfully!
+                                            </Text>
+                                            <TouchableOpacity
+                                                onPress={() => setShowSuccessModal(false)}
+                                                style={{
+                                                backgroundColor: '#3A5BA0',
+                                                paddingVertical: 10,
+                                                paddingHorizontal: 20,
+                                                borderRadius: 8,
+                                                }}
+                                            >
+                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>OK</Text>
+                                            </TouchableOpacity>
                                             </View>
                                         </View>
-                                    </Modal>
+                                        </Modal>
+
                                     <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>

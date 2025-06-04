@@ -229,10 +229,11 @@ export default function ListScreen() {
                 <Text style={[styles.countryText, { color: darkMode ? '#fff' : '#000' }]}>{country}</Text>
                 <TouchableOpacity
                   onPress={() => openDeleteModal('country', { country })}
+                  style ={{backgroundColor: '#a03a3a', marginLeft:10, padding: 8, borderRadius: '100%'}}
                 >
                   <Image
                     source={require('../../assets/icons/close.png')}
-                    style={{ width: 14, height: 14, marginLeft: 20, marginTop: 4 }}>
+                    style={{ width: 14, height: 14}}>
                   </Image>
                 </TouchableOpacity>
               </View>
@@ -254,10 +255,11 @@ export default function ListScreen() {
                         <Text style={[styles.cityText, { color: darkMode ? '#fff' : '#000' }]}>{city}</Text>
                         <TouchableOpacity
                           onPress={() => openDeleteModal('city', { country, city })}
+                          style ={{backgroundColor: '#a03a3a', marginLeft:20, padding: 7, borderRadius: '100%'}}
                         >
                           <Image
                             source={require('../../assets/icons/close.png')}
-                            style={{ width: 12, height: 12, marginLeft: 20, marginTop: 2 }}>
+                            style={{ width: 12, height: 12}}>
                           </Image>
                         </TouchableOpacity>
                       </View>
@@ -281,10 +283,11 @@ export default function ListScreen() {
                                 </Text>
                                 <TouchableOpacity
                                   onPress={() => openDeleteModal('monument', { country, city, monument })}
+                                  style ={{backgroundColor: '#a03a3a', marginLeft:30, padding: 6, borderRadius: '100%'}}
                                 >
                                   <Image
                                     source={require('../../assets/icons/close.png')}
-                                    style={{ width: 10, height: 10, marginLeft: 20, marginTop: 3 }}>
+                                    style={{ width: 10, height: 10}}>
                                   </Image>
                                 </TouchableOpacity>
                               </View>

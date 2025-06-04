@@ -7,6 +7,10 @@ import 'react-native-reanimated';
 import { ThemeProvider } from '../components/ThemeContext';
 import { LanguageProvider } from '../components/LanguageContext';
 
+
+
+
+
 // Evita que o splash screen desapareça antes das fontes carregarem
 SplashScreen.preventAutoHideAsync();
 
