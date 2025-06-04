@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, ImageBackground, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
@@ -10,7 +11,7 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import { auth } from '../../firebase/firebaseConf.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../components/ThemeContext';
-
+import { translateAzure } from '../../api/apiTranslateAzure.js';
 
 
 export default function Home() {
@@ -21,6 +22,8 @@ export default function Home() {
         Merriweather_700Bold,
         OpenSans_400Regular,
     });
+    const [countries, setCountries] = useState([]);
+    const [lang, setLang] = useState();
     const [urls, setUrls] = useState([]);
     const popularTouristCountries = [
         "Portugal",
@@ -30,14 +33,42 @@ export default function Home() {
         // "Mexico", "Germany", "Thailand", "Greece", "Japan", "Brazil",
     ];
 
+    useFocusEffect(
+        useCallback(() => {
+            const getLang = async () => {
+                const language = await AsyncStorage.getItem('appLanguage');
+                if (language) {
+                    setLang(language);
+                } else {
+                    setLang('en');
+                }
+            }
+            getLang();
+        }, [])
+    );
+    
+    useEffect(() => {
+        const translateCountries = async () => {
+            const translatedCountries = await Promise.all(
+                popularTouristCountries.map(async (country) => {
+                    const translated = await translateAzure(country, lang);
+                    return translated;
+                })
+            );
+            setCountries(translatedCountries);
+        };
+        translateCountries();
+    }, [lang]);
+
 
     useEffect(() => {
         console.log('User ID:', auth.currentUser?.uid);
         const storeUserID = async () => {
-            try {await AsyncStorage.setItem('userID', auth.currentUser.uid);}
+            try { await AsyncStorage.setItem('userID', auth.currentUser.uid); }
             catch (error) {
                 console.error('Error saving user ID:', error);
-        }};
+            }
+        };
 
         const requestLocationPermission = async () => {
             if (Platform.OS === 'android') {
@@ -56,13 +87,14 @@ export default function Home() {
                         const data = await fetchImagesUnsplash(country + " landmarks and tourism");
                         return data;
                     })
-                );                
+                );
                 setUrls(urls);
             }
             catch (error) {
                 console.error('Error fetching data:', error);
             }
         };
+
 
         storeUserID();
         fetchData();
@@ -87,8 +119,14 @@ export default function Home() {
                         style={styles.icon} />
                 </ImageBackground>
             </View>
-            <SearchBar/>
-            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Our Suggestions</Text>
+            <SearchBar />
+            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>
+                {{
+                    en: "Our Suggestions",
+                    pt: "As Nossas Sugestões",
+                    sl: "Naše Priporočila"
+                }[lang] || "Our Suggestions"}
+            </Text>
             <ScrollView
                 horizontal={true}
                 //showsHorizontalScrollIndicator={false}
@@ -97,7 +135,7 @@ export default function Home() {
 
                 {
                     urls.length > 0 ?
-                        popularTouristCountries.map((country, index) => {
+                        countries.map((country, index) => {
                             return (
                                 <TouchableOpacity
                                     style={styles.countryBlock} key={index}

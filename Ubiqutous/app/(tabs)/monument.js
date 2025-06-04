@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ImageBackground, ScrollView } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_600SemiBold } from '@expo-google-fonts/open-sans';
@@ -26,8 +27,7 @@ import { useTheme } from '../../components/ThemeContext';
 
 
 import { sendLocalNotification } from '../../utils/sendNotification.js';
-
-
+import { translateAzure } from '../../api/apiTranslateAzure.js';
 
 export default function Monument() {
     const navigation = useNavigation();
@@ -43,13 +43,13 @@ export default function Monument() {
     const [urls, setUrls] = useState([]);
 
     const [description, setDescription] = useState([]);
-
+    const [lang, setLang] = useState();
     const [coordinatesC, setCoordinatesC] = useState([]);
     const [selfCoordinates, setSelfCoordinates] = useState([]);
     const [MCoordinates, setMCoordinates] = useState([]);
     const route = useRoute();
     const { monument, city, country, url, prevUrls } = route.params;
-
+    const [monument_, setMonument_] = useState(monument);
     const [listName, setListName] = useState('');
     const [myLists, setMyLists] = useState([]);
     const [userID, setUserID] = useState('');
@@ -181,6 +181,31 @@ export default function Monument() {
         }
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            const getLang = async () => {
+                const language = await AsyncStorage.getItem('appLanguage');
+                if (language) {
+                    setLang(language);
+                    const translated = await translateAzure(monument, language);
+                    setMonument_(translated);
+                } else {
+                    setLang('en');
+                }
+            }
+            getLang();
+        }, [])
+    );
+
+    useEffect(() => {
+        const translateCountries = async () => {
+            setMonuments(translatedCountries);
+            const translated = await translateAzure(monument, lang);
+            setMonument_(translated);
+        };
+        translateCountries();
+    }, [lang]);
+
     useEffect(() => {
         let url_;
         url === undefined ? url_ = false : url_ = true;
@@ -188,7 +213,8 @@ export default function Monument() {
         const fetchData = async (monument) => {
             try {
                 const data = await fetchMonumentDescription(monument);
-                setDescription(data);
+                const translatedData = await translateAzure(data, lang);
+                setDescription(translatedData);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
             }

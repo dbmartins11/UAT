@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, ActivityIndicator } from 'react-native';
 import { useFonts, Merriweather_700Bold } from '@expo-google-fonts/merriweather';
 import { OpenSans_400Regular } from '@expo-google-fonts/open-sans';
@@ -7,9 +7,9 @@ import AppLoading from 'expo-app-loading';
 import { useRoute } from '@react-navigation/native';
 import { fetchCities, fetchImages } from '../../api/serpApi.js';
 import { fetchImagesUnsplash } from '../../api/apiUnsplash.js';
-import { useNavigation } from 'expo-router';
+import { useFocusEffect, useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
-
+import { translateAzure } from '../../api/apiTranslateAzure.js';
 import { db } from '../../firebase/firebaseConf';
 import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -33,10 +33,12 @@ export default function Country() {
     const route = useRoute();
     const { country, urls } = route.params;
 
+    const [lang, setLang] = useState();
     const [getUrls, setUrls] = useState(urls || []);
     const [getNames, setGetNames] = useState(false);
     const [images, setImages] = useState([]);
     const [imagesReady, setImagesReady] = useState(false);
+    const [citiesNAV, setCitiesNAV] = useState([]);
     const [cities, setCities] = useState([]);
     const [citiesImg, setCitiesImg] = useState([]);
     const [fontsLoaded] = useFonts({
@@ -93,35 +95,19 @@ export default function Country() {
         }
     };
 
-    const LoadImages = async () => {
-    const preloadImages = async (urls) => {
-        const cacheImages = urls.map((url) => Image.prefetch(url));
-        await Promise.all(cacheImages);
-    };
-
-    await preloadImages(getUrls);
-    setImagesReady(true);
-    };
-
-
-    useEffect(() => {
-        const getUserID = async () => {
-            const id = await AsyncStorage.getItem('userID');
-            setUserID(id || 'Unnamed');
-            console.log("User ID: ", userID);
-        };
-
-        const getUserLanguage = async () => {
-            const lang = await getCurrentLanguage();
-            setLanguage(lang);
-        };
-
-        getUserID();
-        getUserLanguage();
-        getLists();
-        
-        }, [getNames]);
-
+    useFocusEffect(
+        useCallback(() => {
+            const getLang = async () => {
+                const language = await AsyncStorage.getItem('appLanguage');
+                if (language) {
+                    setLang(language);
+                } else {
+                    setLang('en');
+                }
+            }
+            getLang();
+        }, [])
+    );
 
     useEffect(() => {
         setImagesReady(false);
@@ -146,8 +132,18 @@ export default function Country() {
         const fetchData = async (country) => {
             let dataNames = [];
             try {
+                // console.log("AAAAAAAAAAAAAAA: ", country);
+                // const countryEn = await translateAzure(country, 'en');
+                // dataNames = await fetchCities(countryEn + "+all");
                 dataNames = await fetchCities(country + "+all");
-                setCities(dataNames);
+                const translatedMonuments = await Promise.all(
+                    dataNames.map(async (country) => {
+                        const translated = await translateAzure(country, lang);
+                        return translated;
+                    })
+                );
+                setCities(translatedMonuments);
+                setCitiesNAV(dataNames);
                 setGetNames(true);
             } catch (error) {
                 console.error('Error fetching the cities\' names:', error);
@@ -167,7 +163,8 @@ export default function Country() {
 
         const fetchCoutryImages = async (country) => {
             try {
-                const data = await fetchImagesUnsplash(country + " landmarks and tourism");
+                const countryEn = await translateAzure(country, 'en');
+                const data = await fetchImagesUnsplash(countryEn + " landmarks and tourism");
                 setUrls(data);
             } catch (error) {
                 console.error('Error fetching data:', error);
@@ -180,7 +177,7 @@ export default function Country() {
         fetchData(country);
         getCountryImages();
 
-    }, [urls]);
+    }, [country, urls, lang]);
 
 
     useEffect(() => {
