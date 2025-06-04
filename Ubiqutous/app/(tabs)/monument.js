@@ -350,6 +350,8 @@ export default function Monument() {
                                 longitude: selfCoordinates[1],
                             }}
                             title="You are here"
+                            description="Your current location"
+                            pinColor="blue"
                         />
                     )}
                 </MapView>
@@ -358,6 +360,16 @@ export default function Monument() {
                 <Text style={[styles.description, { color: darkMode ? '#ddd' : '#000' }]}>Loading map...</Text>)
             }
 
+            <View style={styles.legendContainer}>
+                <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: 'blue' }]} />
+                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>Me</Text>
+                </View>
+                <View style={styles.legendItem}>
+                    <View style={[styles.legendDot, { backgroundColor: 'red' }]} />
+                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>Monument</Text>
+                </View>
+            </View>
 
             {isSidebarOpen && (
                 <TouchableWithoutFeedback onPress={handleBackdropPress}>
@@ -521,5 +533,29 @@ const styles = StyleSheet.create({
     scrollContainer: {
         flexGrow: 1,
         paddingBottom: 20,
+    },
+
+    legendContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    legendItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 10,
+    },
+    legendDot: {
+        width: 14,
+        height: 14,
+        borderRadius: 7,
+        marginRight: 6,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    legendText: {
+        fontSize: 16,
     },
 });
