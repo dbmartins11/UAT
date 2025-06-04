@@ -22,10 +22,14 @@ import { db, auth } from '../../firebase/firebaseConf';
 import { getDocs } from 'firebase/firestore';
 import { use } from 'react';
 import { useNavigation } from 'expo-router';
+import { useTheme } from '../../components/ThemeContext'; 
+
 
 
 export default function Monument() {
     const navigation = useNavigation();
+    const { darkMode } = useTheme();
+
     const [fontsLoaded] = useFonts({
         Merriweather_700Bold,
         OpenSans_600SemiBold,
@@ -273,7 +277,7 @@ export default function Monument() {
         <ScrollView
             horizontal={false}
             showsVerticalScrollIndicator={true}
-            contentContainerStyle={styles.scrollContainer}>
+            contentContainerStyle={[styles.scrollContainer, { backgroundColor: darkMode ? '#111' : '#fff' }]}>
             <View style={styles.main}>
                 {hasUrls === true ? (
                     <ImageBackground
@@ -284,16 +288,14 @@ export default function Monument() {
                             onPress={onPress} />
                     </ImageBackground>
                 ) : (
-                    <Text style={styles.description}>
-                        No images to display
-                    </Text>
+                    <Text style={[styles.description, { color: darkMode ? '#ddd' : '#000' }]}>No images to display</Text>
                 )}
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                 {monument ?
-                    <Text style={styles.title}>{monument}</Text>
+                    <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{monument}</Text>
                     :
-                    <Text style={styles.title}>Undefined</Text>
+                    <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                 }
                 <TouchableOpacity
                     style={{ marginLeft: 20, borderRadius: 25, }}
@@ -305,9 +307,7 @@ export default function Monument() {
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.description}>
-                {description}
-            </Text>
+            <Text style={[styles.description, { color: darkMode ? '#ddd' : '#000' }]}>{description}</Text>
             {coordinatesC !== null && coordinatesC.length > 0 ? (
                 <MapView
                     style={{ width: '100%', height: screenHeight * 0.4 }}
@@ -347,9 +347,7 @@ export default function Monument() {
                 </MapView>
 
             ) : (
-                <Text style={styles.description}>
-                    Loading map...
-                </Text>)
+                <Text style={[styles.description, { color: darkMode ? '#ddd' : '#000' }]}>Loading map...</Text>)
             }
 
 
@@ -360,7 +358,8 @@ export default function Monument() {
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: '#fff',width: '70%',
+                                    backgroundColor: darkMode ? '#222' : '#fff',
+                                    width: '70%',
                                     height: '100%',
                                     position: 'absolute',
                                     right: 0,
@@ -407,10 +406,11 @@ export default function Monument() {
                                                 alignItems: 'center',
                                                 width: 250
                                             }}>
-                                                <Text style={{ fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
+                                                <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Create a new list?</Text>
                                                     <View>
                                                             <TextInput
                                                                 placeholder="List Name"
+                                                                placeholderTextColor={darkMode ? '#999' : '#666'}
                                                                 value={listName}
                                                                 onChangeText={setListName}
                                                                 style={{
@@ -420,8 +420,11 @@ export default function Monument() {
                                                                     padding: 10,
                                                                     marginBottom: 10,
                                                                     width: 150,
-                                                                }}
+                                                                    backgroundColor: darkMode ? '#333' : '#fff',
+                                                                    color: darkMode ? '#fff' : '#000'
+                                                                }}  
                                                             />
+
                                                     </View>
                                                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
                                                         

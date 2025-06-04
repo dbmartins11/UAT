@@ -18,7 +18,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 import { get } from 'react-native/Libraries/TurboModule/TurboModuleRegistry.js';
 
+import { useTheme } from '../../components/ThemeContext';
+
 export default function City() {
+    const { darkMode } = useTheme();
+
     const navigation = useNavigation();
     const route = useRoute();
     const { city, urls, country, prevUrls } = route.params;
@@ -253,7 +257,12 @@ export default function City() {
     };
 
     return (
-        <View style={{ flex: 1, padding: 10 }}>
+        <View style={{ 
+            flex: 1, 
+            padding: 10, 
+            backgroundColor: darkMode ? '#000' : '#fff' 
+            }}>
+
             {imagesReady ? (
                 <View>
                     <BackButton
@@ -293,9 +302,9 @@ export default function City() {
                     </View>
                     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
                         {city ?
-                            <Text style={styles.title}>{city}</Text>
+                            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{city}</Text>
                             :
-                            <Text style={styles.title}>Undefined</Text>
+                            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                         }
                         <TouchableOpacity
                             style={{ marginLeft: 20, borderRadius: 25, }}
@@ -331,6 +340,7 @@ export default function City() {
                                             fontSize: 17,
                                             fontWeight: 'bold',
                                             textTransform: 'uppercase',
+                                            color: darkMode ? '#fff' : '#000'
                                         }}>
                                             {monument}
                                         </Text>
@@ -352,13 +362,13 @@ export default function City() {
                                 </TouchableOpacity>
                             ))
                         ) : (
-                            <Text style={styles.title}>No Monuments Found</Text>
+                            <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>No Monuments Found</Text>
                         )}
                     </ScrollView>
                 </View>
             ) :
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={{ fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
+                    <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 20, fontFamily: 'OpenSans_400Regular' }}>
                         Loading
                     </Text>
                     <ActivityIndicator
@@ -376,14 +386,15 @@ export default function City() {
                             <View
                                 ref={sidebarRef}
                                 style={{
-                                    backgroundColor: '#fff', width: '70%',
+                                    backgroundColor: darkMode ? '#333' : '#000',
+                                    width: '70%',
                                     height: '100%',
                                     position: 'absolute',
                                     right: 0,
                                     top: 0,
                                     padding: 20,
                                 }}>
-                                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
+                                <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
                                 {(
                                     myLists.map((list, idx) => (
                                         <TouchableOpacity
@@ -417,13 +428,13 @@ export default function City() {
                                             alignItems: 'center'
                                         }}>
                                             <View style={{
-                                                backgroundColor: '#fff',
+                                                backgroundColor: darkMode ? '#333' : '#000',
                                                 padding: 30,
                                                 borderRadius: 12,
                                                 alignItems: 'center',
                                                 width: 250
                                             }}>
-                                                <Text style={{ fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
+                                                <Text style={{color: darkMode ? '#fff' : '#fff', fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
                                                 <View>
                                                     <TextInput
                                                         placeholder="List Name"
@@ -446,13 +457,13 @@ export default function City() {
                                                         onPress={() => {
                                                             createList();
                                                         }}>
-                                                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
                                                     </TouchableOpacity>
 
 
                                                     <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
                                                         onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Cancel</Text>
                                                     </TouchableOpacity>
 
 
@@ -460,7 +471,7 @@ export default function City() {
                                             </View>
                                         </View>
                                     </Modal>
-                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                    <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableWithoutFeedback>
