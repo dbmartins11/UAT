@@ -11,7 +11,7 @@ import { useNavigation } from 'expo-router';
 import BackButton from '../../components/backButton.js';
 
 import { db } from '../../firebase/firebaseConf';
-import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion} from 'firebase/firestore';
+import { doc, getDoc, getDocs, setDoc, collection, updateDoc, arrayUnion } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { TouchableWithoutFeedback, Modal, TextInput } from 'react-native';
 
@@ -35,43 +35,43 @@ export default function Country() {
         CrimsonText_400Regular,
     });
 
-   const [listName, setListName] = useState('');
-      const [myLists, setMyLists] = useState([]);
-      const [userID, setUserID] = useState('');
-      const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-      const sidebarRef = useRef(null);
-      const [modalVisible, setModalVisible] = useState(false);
-  
-      const toggleSidebar = () => {
-          setIsSidebarOpen(!isSidebarOpen);
-      };
-  
-      const closeSidebar = () => {
-          setIsSidebarOpen(false);
-      };
-  
-      const handleBackdropPress = () => {
-          if (isSidebarOpen) {
-              setIsSidebarOpen(false);
-          }
-      };
-  
-      const getLists = async () => {
-          console.log("Get Lists from" + userID);
-          if (!userID) return;
-          try {
-              console.log("Lists fetching");
-              const listsRef = collection(db, 'users', userID, 'lists');
-              const snapshot = await getDocs(listsRef);
-              const lists = [];
-              snapshot.forEach(doc => {
-                  lists.push({ id: doc.id, ...doc.data() });
-              });
-              setMyLists(lists);
-          } catch (error) {
-              console.error('Error fetching lists:', error);
-          }
-      };
+    const [listName, setListName] = useState('');
+    const [myLists, setMyLists] = useState([]);
+    const [userID, setUserID] = useState('');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const sidebarRef = useRef(null);
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
+    const closeSidebar = () => {
+        setIsSidebarOpen(false);
+    };
+
+    const handleBackdropPress = () => {
+        if (isSidebarOpen) {
+            setIsSidebarOpen(false);
+        }
+    };
+
+    const getLists = async () => {
+        console.log("Get Lists from" + userID);
+        if (!userID) return;
+        try {
+            console.log("Lists fetching");
+            const listsRef = collection(db, 'users', userID, 'lists');
+            const snapshot = await getDocs(listsRef);
+            const lists = [];
+            snapshot.forEach(doc => {
+                lists.push({ id: doc.id, ...doc.data() });
+            });
+            setMyLists(lists);
+        } catch (error) {
+            console.error('Error fetching lists:', error);
+        }
+    };
 
     useEffect(() => {
         setImagesReady(false);
@@ -203,20 +203,20 @@ export default function Country() {
             const docSnap = await getDoc(listDoc);
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                    await updateDoc(listDoc, {
-                        [`countries.${country}`]: {
-                            visited: false,
-                        }
-                    });
+                await updateDoc(listDoc, {
+                    [`countries.${country}`]: {
+                        visited: false,
+                    }
+                });
             }
-            console.log("Country" + country +  "added to list:", listName);
+            console.log("Country" + country + "added to list:", listName);
             getLists();
         } catch (error) {
             console.error('Error updating list:', error);
             Alert.alert('Error updating list', error.message);
         }
-    };    
-        
+    };
+
 
     return (
         <View style={{ flex: 1, padding: 10 }}>
@@ -330,105 +330,105 @@ export default function Country() {
                     />
                 </View>
             }
-            
+
             {isSidebarOpen && (
-                        <TouchableWithoutFeedback onPress={handleBackdropPress}>
-                            <View style={{position: 'absolute',top: 0,left: 0,right: 0,bottom: 0,backgroundColor: 'rgba(0,0,0,0.5)',justifyContent: 'flex-end',zIndex: 10}}>
-                                <TouchableWithoutFeedback>
-                                    <View
-                                        ref={sidebarRef}
-                                        style={{
-                                            backgroundColor: '#fff',width: '70%',
-                                            height: '100%',
-                                            position: 'absolute',
-                                            right: 0,
-                                            top: 0,
-                                            padding: 20,
-                                        }}>
-                                        <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
-                                        {(
-                                            myLists.map((list, idx) => (
-                                                <TouchableOpacity
-                                                    key={idx}
-                                                    style={{ marginBottom: 10, padding: 10, backgroundColor: '#eee', borderRadius: 8 }}
-                                                    onPress={() => updateList(list.name, country)}
-                                                >
-                                                    <Text>{list.name || `List ${idx + 1}`}</Text>
-                                                </TouchableOpacity>
-                                            ))
-                                        )}
+                <TouchableWithoutFeedback onPress={handleBackdropPress}>
+                    <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end', zIndex: 10 }}>
+                        <TouchableWithoutFeedback>
+                            <View
+                                ref={sidebarRef}
+                                style={{
+                                    backgroundColor: '#fff', width: '70%',
+                                    height: '100%',
+                                    position: 'absolute',
+                                    right: 0,
+                                    top: 0,
+                                    padding: 20,
+                                }}>
+                                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>Lists</Text>
+                                {(
+                                    myLists.map((list, idx) => (
                                         <TouchableOpacity
-                                            style={{
-                                                backgroundColor: '#000',
-                                                padding: 12,
-                                                borderRadius: 8,
-                                                alignItems: 'center',
-                                                marginTop: 10,
-                                            }}
-                                            onPress={() => {modalVisible ? setModalVisible(false) : setModalVisible(true)}}>
-                                            <Modal
-                                                animationType="fade"
-                                                transparent={true}
-                                                visible={modalVisible}
-                                                onRequestClose={() => setModalVisible(false)}
-                                            >
-                                                <View style={{
-                                                    flex: 1,
-                                                    backgroundColor: 'rgba(0,0,0,0.5)',
-                                                    justifyContent: 'center',
-                                                    alignItems: 'center'
-                                                }}>
-                                                    <View style={{
-                                                        backgroundColor: '#fff',
-                                                        padding: 30,
-                                                        borderRadius: 12,
-                                                        alignItems: 'center',
-                                                        width: 250
-                                                    }}>
-                                                        <Text style={{ fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
-                                                            <View>
-                                                                    <TextInput
-                                                                        placeholder="List Name"
-                                                                        value={listName}
-                                                                        onChangeText={setListName}
-                                                                        style={{
-                                                                            borderWidth: 1,
-                                                                            borderColor: '#ccc',
-                                                                            borderRadius: 8,
-                                                                            padding: 10,
-                                                                            marginBottom: 10,
-                                                                            width: 150,
-                                                                        }}
-                                                                    />
-                                                            </View>
-                                                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
-                                                                
-                                                            <TouchableOpacity
-                                                                style={{ backgroundColor: '#000',paddingVertical: 10,paddingHorizontal: 20, borderRadius: 8,marginRight: 10,}}
-                                                                onPress={() => {                                                                
-                                                                    createList();
-                                                                }}>
-                                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
-                                                            </TouchableOpacity>
-        
-         
-                                                            <TouchableOpacity style={{backgroundColor: '#ccc', paddingVertical: 10,paddingHorizontal: 20,borderRadius: 8,}}
-                                                                onPress={() => setModalVisible(false)}>
-                                                                <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
-                                                            </TouchableOpacity>
-        
-        
-                                                        </View>
-                                                    </View>
-                                                </View>
-                                            </Modal>
-                                            <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                            key={idx}
+                                            style={{ marginBottom: 10, padding: 10, backgroundColor: '#eee', borderRadius: 8 }}
+                                            onPress={() => updateList(list.name, country)}
+                                        >
+                                            <Text>{list.name || `List ${idx + 1}`}</Text>
                                         </TouchableOpacity>
-                                    </View>
-                                </TouchableWithoutFeedback>
+                                    ))
+                                )}
+                                <TouchableOpacity
+                                    style={{
+                                        backgroundColor: '#000',
+                                        padding: 12,
+                                        borderRadius: 8,
+                                        alignItems: 'center',
+                                        marginTop: 10,
+                                    }}
+                                    onPress={() => { modalVisible ? setModalVisible(false) : setModalVisible(true) }}>
+                                    <Modal
+                                        animationType="fade"
+                                        transparent={true}
+                                        visible={modalVisible}
+                                        onRequestClose={() => setModalVisible(false)}
+                                    >
+                                        <View style={{
+                                            flex: 1,
+                                            backgroundColor: 'rgba(0,0,0,0.5)',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
+                                        }}>
+                                            <View style={{
+                                                backgroundColor: '#fff',
+                                                padding: 30,
+                                                borderRadius: 12,
+                                                alignItems: 'center',
+                                                width: 250
+                                            }}>
+                                                <Text style={{ fontSize: 18, marginBottom: 20 }}>Create a new list?</Text>
+                                                <View>
+                                                    <TextInput
+                                                        placeholder="List Name"
+                                                        value={listName}
+                                                        onChangeText={setListName}
+                                                        style={{
+                                                            borderWidth: 1,
+                                                            borderColor: '#ccc',
+                                                            borderRadius: 8,
+                                                            padding: 10,
+                                                            marginBottom: 10,
+                                                            width: 150,
+                                                        }}
+                                                    />
+                                                </View>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+
+                                                    <TouchableOpacity
+                                                        style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
+                                                        onPress={() => {
+                                                            createList();
+                                                        }}>
+                                                        <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                    </TouchableOpacity>
+
+
+                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
+                                                        onPress={() => setModalVisible(false)}>
+                                                        <Text style={{ color: '#333', fontWeight: 'bold' }}>Cancel</Text>
+                                                    </TouchableOpacity>
+
+
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </Modal>
+                                    <Text style={{ color: '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                </TouchableOpacity>
                             </View>
                         </TouchableWithoutFeedback>
-                    )}
+                    </View>
+                </TouchableWithoutFeedback>
+            )}
         </View>
     );
 }
