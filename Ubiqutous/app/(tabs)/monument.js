@@ -19,8 +19,9 @@ import { doc, getDoc, setDoc, collection, updateDoc, arrayUnion} from 'firebase/
 import { TextInput, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, auth } from '../../firebase/firebaseConf';
-import { getDocs } from 'firebase/firestore'; // Add this import at the top if not present
+import { getDocs } from 'firebase/firestore';
 import { use } from 'react';
+import { useNavigation } from 'expo-router';
 
 
 export default function Monument() {
@@ -170,7 +171,6 @@ export default function Monument() {
     };
             
     useEffect(() => {
-        //monument === undefined ? monument = "Torre Eiffel" : monument = monument; 
         let url_;
         url === undefined ? url_ = false : url_ = true;
         setHasUrls(url_);
@@ -308,7 +308,7 @@ export default function Monument() {
             <Text style={styles.description}>
                 {description}
             </Text>
-            {/* {coordinatesC !== null && coordinatesC.length > 0 ? (
+            {coordinatesC !== null && coordinatesC.length > 0 ? (
                 <MapView
                     style={{ width: '100%', height: screenHeight * 0.4 }}
                     initialRegion={{
@@ -350,7 +350,7 @@ export default function Monument() {
                 <Text style={styles.description}>
                     Loading map...
                 </Text>)
-            } */}
+            }
 
 
             {isSidebarOpen && (
