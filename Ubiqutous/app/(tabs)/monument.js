@@ -307,13 +307,13 @@ export default function Monument() {
                 )}
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 10 }}>
-                {monument ?
-                    <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{monument}</Text>
+                {monument_ ?
+                    <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>{monument_}</Text>
                     :
                     <Text style={[styles.title, { color: darkMode ? '#fff' : '#000' }]}>Undefined</Text>
                 }
                 <TouchableOpacity
-                            style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
+                    style={{ marginLeft: 20, borderRadius: 25, color: darkMode ? '#fff' : '#000', backgroundColor: darkMode ? '#fff' : '#fff', padding: 10 }}
                     onPress={toggleSidebar}>
                     <Image
                         source={require('./../../assets/icons/save.png')}
@@ -370,11 +370,23 @@ export default function Monument() {
             <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: 'blue' }]} />
-                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>Me</Text>
+                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>
+                        {{
+                            en: "Me",
+                            pt: "Eu",
+                            sl: "Jaz"
+                        }[lang] || "Me"}
+                    </Text>
                 </View>
                 <View style={styles.legendItem}>
                     <View style={[styles.legendDot, { backgroundColor: 'red' }]} />
-                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>Monument</Text>
+                    <Text style={[styles.legendText, { color: darkMode ? '#ddd' : '#000' }]}>
+                        {{
+                            en: "Monument",
+                            pt: "Monumento",
+                            sl: "Spomenik"
+                        }[lang] || "Monument"}
+                    </Text>
                 </View>
             </View>
 
@@ -390,7 +402,7 @@ export default function Monument() {
                                     height: '100%',
                                     position: 'absolute',
                                     right: 0,
-                                    top: 0, 
+                                    top: 0,
                                     padding: 20,
                                 }}>
                                 <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Lists</Text>
@@ -417,34 +429,63 @@ export default function Monument() {
                                     <Modal
                                         animationType="fade"
                                         transparent={true}
-                                        visible={confirmVisible}
-                                        onRequestClose={() => setConfirmVisible(false)}
-                                        >
+                                        visible={modalVisible}
+                                        onRequestClose={() => setModalVisible(false)}
+                                    >
                                         <View style={{
                                             flex: 1,
-                                            justifyContent: 'center',
-                                            alignItems: 'center',
                                             backgroundColor: 'rgba(0,0,0,0.5)',
+                                            justifyContent: 'center',
+                                            alignItems: 'center'
                                         }}>
                                             <View style={{
-                                            backgroundColor: darkMode ? '#333' : '#fff',
-                                            padding: 30,
-                                            borderRadius: 12,
-                                            alignItems: 'center',
-                                            width: 250,
+                                                backgroundColor: darkMode ? '#333' : '#000',
+                                                padding: 30,
+                                                borderRadius: 12,
+                                                alignItems: 'center',
+                                                width: 250
                                             }}>
-                                            <Text style={{ color: darkMode ? '#fff' : '#000', fontSize: 18, marginBottom: 20 }}>
-                                                Monument successfully added to list!
-                                            </Text>
-                                            <TouchableOpacity
-                                                onPress={() => setConfirmVisible(false)}
-                                                style={{ backgroundColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 }}>
-                                                <Text style={{ color: '#fff', fontWeight: 'bold' }}>OK</Text>
-                                            </TouchableOpacity>
+                                                <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Create a new list?</Text>
+                                                <View>
+                                                    <TextInput
+                                                        placeholder="List Name"
+                                                        placeholderTextColor={darkMode ? '#999' : '#666'}
+                                                        value={listName}
+                                                        onChangeText={setListName}
+                                                        style={{
+                                                            borderWidth: 1,
+                                                            borderColor: '#ccc',
+                                                            borderRadius: 8,
+                                                            padding: 10,
+                                                            marginBottom: 10,
+                                                            width: 150,
+                                                            backgroundColor: darkMode ? '#333' : '#fff',
+                                                            color: darkMode ? '#fff' : '#000'
+                                                        }}
+                                                    />
+
+                                                </View>
+                                                <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>
+
+                                                    <TouchableOpacity
+                                                        style={{ backgroundColor: '#000', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, marginRight: 10, }}
+                                                        onPress={() => {
+                                                            createList();
+                                                        }}>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                    </TouchableOpacity>
+
+
+                                                    <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
+                                                        onPress={() => setModalVisible(false)}>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Cancel</Text>
+                                                    </TouchableOpacity>
+
+
+                                                </View>
                                             </View>
                                         </View>
-                                        </Modal>
-
+                                    </Modal>
                                     <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
                                 </TouchableOpacity>
                             </View>

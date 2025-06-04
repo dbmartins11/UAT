@@ -4,7 +4,9 @@ import { Platform, Image, View } from 'react-native';
 import { ThemeProvider } from '../../components/ThemeContext';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
+import { scheduleTravelReminder } from '../../utils/scheduleNotification'; 
 
+// Handler para mostrar as notificações
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -12,22 +14,6 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
-
-// Função para agendar notificação a cada 5 minutos
-const scheduleTravelReminder = async () => {
-  await Notifications.cancelAllScheduledNotificationsAsync(); // Evita duplicação
-
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: 'Ready for your next trip?',
-      body: 'Discover a new destination now!',
-    },
-    trigger: {
-      seconds: 300, // 5 minutos
-      repeats: true,
-    },
-  });
-};
 
 export default function TabLayout() {
   useEffect(() => {
@@ -55,7 +41,7 @@ export default function TabLayout() {
           });
         }
 
-        await scheduleTravelReminder(); // Agendar notificação recorrente
+        await scheduleTravelReminder(); // ✅ Agora chamado corretamente
       } else {
         console.warn('Must use physical device for notifications');
       }
@@ -149,6 +135,7 @@ export default function TabLayout() {
             ),
           }}
         />
+        {/* Ocultos da tab bar */}
         <Tabs.Screen name="index" options={{ href: null, tabBarStyle: { display: 'none' } }} />
         <Tabs.Screen name="login" options={{ href: null, tabBarStyle: { display: 'none' } }} />
         <Tabs.Screen name="register" options={{ href: null, tabBarStyle: { display: 'none' } }} />
