@@ -135,13 +135,16 @@ export default function Country() {
                 // console.log("AAAAAAAAAAAAAAA: ", country);
                 // const countryEn = await translateAzure(country, 'en');
                 // dataNames = await fetchCities(countryEn + "+all");
-                dataNames = await fetchCities(country + "+all");
+                const countryEn = await translateAzure(country, 'en');
+                console.log("Country in EN: ", countryEn);
+                dataNames = await fetchCities(countryEn + "+all");
                 const translatedMonuments = await Promise.all(
                     dataNames.map(async (country) => {
                         const translated = await translateAzure(country, lang);
                         return translated;
                     })
                 );
+                console.log("QQQQQQQQ", dataNames);
                 setCities(translatedMonuments);
                 setCitiesNAV(dataNames);
                 setGetNames(true);
@@ -244,36 +247,36 @@ export default function Country() {
     };
 
 
-   
-const updateList = async (listName, city) => {
-  try {
-    const userListsRef = collection(db, 'users', userID, 'lists');
-    const listDoc = doc(userListsRef, listName);
-    const docSnap = await getDoc(listDoc);
 
-    if (docSnap.exists()) {
-      await updateDoc(listDoc, {
-        [`countries.${country}`]: {
-          visited: false,
+    const updateList = async (listName, city) => {
+        try {
+            const userListsRef = collection(db, 'users', userID, 'lists');
+            const listDoc = doc(userListsRef, listName);
+            const docSnap = await getDoc(listDoc);
+
+            if (docSnap.exists()) {
+                await updateDoc(listDoc, {
+                    [`countries.${country}`]: {
+                        visited: false,
+                    }
+                });
+
+                await sendLocalNotification(country);
+                setShowSuccessModal(true);
+
+                console.log("Country " + country + " added to list:", listName);
+                getLists();
+            }
+        } catch (error) {
+            console.error('Error updating list:', error);
+            Alert.alert('Error updating list', error.message);
         }
-      });
-
-      await sendLocalNotification(country);
-      setShowSuccessModal(true); 
-
-      console.log("Country " + country + " added to list:", listName);
-      getLists();
-    }
-  } catch (error) {
-    console.error('Error updating list:', error);
-    Alert.alert('Error updating list', error.message);
-  }
-};
+    };
 
 
 
 
-     return (
+    return (
         <View style={{ flex: 1, padding: 10, backgroundColor: darkMode ? '#000' : '#fff' }}>
             {imagesReady ? (
                 <View>
@@ -338,7 +341,7 @@ const updateList = async (listName, city) => {
                                     key={index}
                                     style={styles.cities}
                                     onPress={() => navigation.navigate('city', {
-                                        city: city,
+                                        city: citiesNAV[index],
                                         urls: citiesImg[index],
                                         country: country,
                                         prevUrls: urls,
@@ -402,7 +405,13 @@ const updateList = async (listName, city) => {
                                     top: 0,
                                     padding: 20,
                                 }}>
-                                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Lists</Text>
+                                <Text style={{ color: darkMode ? '#fff' : '#000', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>
+                                    {{
+                                        en: "Lists",
+                                        pt: "Listas",
+                                        sl: "Seznami"
+                                    }[language] || "Lists"}
+                                </Text>
                                 {(
                                     myLists.map((list, idx) => (
                                         <TouchableOpacity
@@ -442,7 +451,13 @@ const updateList = async (listName, city) => {
                                                 alignItems: 'center',
                                                 width: 250
                                             }}>
-                                                <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#fff' }}>Create a new list?</Text>
+                                                <Text style={{ color: darkMode ? '#fff' : '#fff', fontSize: 18, marginBottom: 20 }}>
+                                                    {{
+                                                        en: "Create a new list?",
+                                                        pt: "Criar uma nova lista?",
+                                                        sl: "Ustvari nov seznam?"
+                                                    }[language] || "Create a new list?"}
+                                                </Text>
                                                 <View>
                                                     <TextInput
                                                         placeholder="List Name"
@@ -465,14 +480,26 @@ const updateList = async (listName, city) => {
                                                         onPress={() => {
                                                             createList();
                                                         }}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>
+                                                            {{
+                                                                en: "Create",
+                                                                pt: "Criar",
+                                                                sl: "Ustvari"
+                                                            }[language] || "Create"}
+                                                        </Text>
 
                                                     </TouchableOpacity>
 
 
                                                     <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
                                                         onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff' }}>Cancel</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff' }}>
+                                                            {{
+                                                                en: "Cancel",
+                                                                pt: "Cancelar",
+                                                                sl: "Prekliči"
+                                                            }[language] || "Cancel"}
+                                                        </Text>
                                                     </TouchableOpacity>
 
 
@@ -480,7 +507,11 @@ const updateList = async (listName, city) => {
                                             </View>
                                         </View>
                                     </Modal>
-                                    <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create New List</Text>
+                                    <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>{{
+                                        en: "Create new list",
+                                        pt: "Criar nova lista",
+                                        sl: "Ustvari nov seznam"
+                                    }[language] || "Create a new list?"}</Text>
                                 </TouchableOpacity>
                             </View>
                         </TouchableWithoutFeedback>

@@ -431,7 +431,13 @@ export default function Monument() {
                                     top: 0,
                                     padding: 20,
                                 }}>
-                                <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Lists</Text>
+                                <Text style={{ color: darkMode ? '#fff' : '#000', fontSize: 20, fontWeight: 'bold', marginBottom: 20 }}>
+                                    {{
+                                        en: "Lists",
+                                        pt: "Listas",
+                                        sl: "Seznami"
+                                    }[language] || "Lists"}
+                                </Text>
                                 {(
                                     myLists.map((list, idx) => (
                                         <TouchableOpacity
@@ -471,7 +477,13 @@ export default function Monument() {
                                                 alignItems: 'center',
                                                 width: 250
                                             }}>
-                                                <Text style={{ fontSize: 18, marginBottom: 20, color: darkMode ? '#fff' : '#000' }}>Create a new list?</Text>
+                                                <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>
+                                                    {{
+                                                        en: "Create a new list?",
+                                                        pt: "Criar uma nova lista?",
+                                                        sl: "Ustvari nov seznam?"
+                                                    }[language] || "Create a new list?"}
+                                                </Text>
                                                 <View>
                                                     <TextInput
                                                         placeholder="List Name"
@@ -498,13 +510,25 @@ export default function Monument() {
                                                         onPress={() => {
                                                             createList();
                                                         }}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Create</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>
+                                                            {{
+                                                                en: "Create",
+                                                                pt: "Criar",
+                                                                sl: "Ustvari"
+                                                            }[language] || "Create"}
+                                                        </Text>
                                                     </TouchableOpacity>
 
 
                                                     <TouchableOpacity style={{ backgroundColor: '#ccc', paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8, }}
                                                         onPress={() => setModalVisible(false)}>
-                                                        <Text style={{ color: darkMode ? '#fff' : '#fff', fontWeight: 'bold' }}>Cancel</Text>
+                                                        <Text style={{ color: darkMode ? '#fff' : '#fff' }}>
+                                                            {{
+                                                                en: "Cancel",
+                                                                pt: "Cancelar",
+                                                                sl: "Prekliči"
+                                                            }[language] || "Cancel"}
+                                                        </Text>
                                                     </TouchableOpacity>
 
 
